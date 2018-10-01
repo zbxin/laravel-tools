@@ -1,0 +1,25 @@
+{
+  "name": "zhieq/laravel-tools",
+  "description": "zhieq group commonly used tools",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "zhieq",
+      "email": "developer@zhieq.com"
+    }
+  ],
+  "require": {
+    "laravel/framework": "^5.*",
+    "ext-openssl": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ZhiEq\\": "/"
+    },
+    "files": [
+      "helpers.php"
+    ]
+  }
+}
