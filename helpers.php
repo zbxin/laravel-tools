@@ -1,5 +1,6 @@
 <?php
 
+
 if (!function_exists('errors')) {
 
     /**
@@ -15,10 +16,11 @@ if (!function_exists('errors')) {
 
     function errors($message, $code = 1, $data = [], $status = 500, $headers = [], $encodingOptions = JSON_UNESCAPED_UNICODE)
     {
+        logs()->info('request return error at:' . microtime(true));
         $returnInfo = [
-            'Request' => \Iit\RedisMonolog\RedisFormatter::$logId,
+            'Request' => app_id(),
         ];
-        if ($message instanceof \App\Contracts\Base\Exception) {
+        if ($message instanceof \Zhieq\Contracts\Exception) {
             $returnInfo['Code'] = $message->getCode();
             $returnInfo['Message'] = $message->getMessage();
             $returnInfo['Data'] = $message->getData();
@@ -29,14 +31,12 @@ if (!function_exists('errors')) {
             $status = $message->getStatusCode();
             $headers = $message->getHeaders();
         } else {
-            list($errorCode, $errorMessage) = (new \App\Extend\ErrorsManager())->getErrorInfo($message);
-            $code = $code === 1 ? ($errorCode === null ? 99999 : $errorCode) : $code;
-            $message = $errorMessage === null ? $message : $errorMessage;
+            $code = $code === 1 ? 99999 : $code;
             $returnInfo['Code'] = $code;
             $returnInfo['Message'] = $message;
             !empty($data) && $returnInfo['Data'] = filter_null($data);
         }
-        Log::error('request has something errors', $returnInfo);
+        logs()->error('request has something errors', $returnInfo);
         return response()->json($returnInfo, $status, $headers, $encodingOptions);
     }
 }
@@ -54,34 +54,15 @@ if (!function_exists('success')) {
 
     function success($data = [], $message = null, $headers = [], $encodingOptions = JSON_UNESCAPED_UNICODE)
     {
-        Log::info('request return success at:' . microtime(true));
-        Log::info('request return success data', ['data' => [
-            'Request' => app('request')->header('X-Request-Id', app_id()),
+        logs()->info('request return success at:' . microtime(true));
+        $returnData = [
+            'Request' => app_id(),
             'Code' => 0,
-            'Message' => $message === null ? trans('tips.request_handle_successful') : $message,
+            'Message' => $message === null ? trans('request_handle_successful') : $message,
             'Data' => is_string($data) ? $data : (is_array($data) ? filter_null(studly_case_array_keys($data)) : filter_null(studly_case_array_keys(collect($data)->toArray()))),
-        ]]);
-        return response()->json([
-            'Request' => app('request')->header('X-Request-Id', app_id()),
-            'Code' => 0,
-            'Message' => $message === null ? trans('tips.request_handle_successful') : $message,
-            'Data' => is_string($data) ? $data : (is_array($data) ? filter_null(studly_case_array_keys($data)) : filter_null(studly_case_array_keys(collect($data)->toArray()))),
-        ], 200, $headers, $encodingOptions);
-    }
-}
-
-if (!function_exists('config_path')) {
-
-    /**
-     * 获取配置文件路径
-     *
-     * @param  string $path
-     * @return string
-     */
-
-    function config_path($path = '')
-    {
-        return app()->basePath() . '/config' . ($path ? '/' . $path : $path);
+        ];
+        logs()->info('request return success data', $returnData);
+        return response()->json($returnData, 200, $headers, $encodingOptions);
     }
 }
 
@@ -308,34 +289,6 @@ if (!function_exists('filter_null')) {
     }
 }
 
-if (!function_exists('identity')) {
-
-    /**
-     * 返回证件管理器
-     *
-     * @return Extend\Identity\IdentityManager
-     */
-
-    function identity()
-    {
-        return app('identity');
-    }
-}
-
-if (!function_exists('verification_code')) {
-
-    /**
-     * 返回验证码管理器
-     *
-     * @return Extend\VerificationCode\VerificationCodeManager
-     */
-
-    function verification_code()
-    {
-        return app('verification_code');
-    }
-}
-
 if (!function_exists('cache')) {
 
     /**
@@ -350,20 +303,6 @@ if (!function_exists('cache')) {
     }
 }
 
-if (!function_exists('http')) {
-
-    /**
-     * GuzzleHttp客户端辅助方法
-     *
-     * @return \GuzzleHttp\Client
-     */
-
-    function http()
-    {
-        return app('http');
-    }
-}
-
 if (!function_exists('app_id')) {
 
     /**
@@ -372,114 +311,33 @@ if (!function_exists('app_id')) {
 
     function app_id()
     {
-        return \Iit\RedisMonolog\RedisFormatter::$logId;
-    }
-}
+        try {
+            return \Ramsey\Uuid\Uuid::uuid4()->toString();
+        } catch (Exception $exception) {
+            return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                // 32 bits for "time_low"
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
 
-if (!function_exists('auth_admin')) {
+                // 16 bits for "time_mid"
+                mt_rand(0, 0xffff),
 
-    /**
-     * @return \App\Models\PersonnelFile|\App\Models\User|\Illuminate\Contracts\Auth\Authenticatable
-     */
+                // 16 bits for "time_hi_and_version",
+                // four most significant bits holds version number 4
+                mt_rand(0, 0x0fff) | 0x4000,
 
-    function auth_admin()
-    {
-        if (!Auth::guest()) {
-            return Auth::user();
+                // 16 bits, 8 bits for "clk_seq_hi_res",
+                // 8 bits for "clk_seq_low",
+                // two most significant bits holds zero and one for variant DCE1.1
+                mt_rand(0, 0x3fff) | 0x8000,
+
+                // 48 bits for "node"
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
         }
-        if (config('request.user_id') === null) {
-            return null;
-        }
-        if (config('request.auth_guard') === null) {
-            return Auth::loginUsingId(config('request.user_id'));
-        }
-        return Auth::guard(config('request.auth_guard'))->loginUsingId(config('request.user_id'));
+
     }
 }
 
-if (!function_exists('storage_private')) {
-
-    /**
-     * @return \OSS\OssClient
-     */
-
-    function storage_private()
-    {
-        return app('oss_private');
-    }
-}
-
-if (!function_exists('storage_public')) {
-
-    /**
-     * @return \OSS\OssClient
-     */
-
-    function storage_public()
-    {
-        return app('oss_public');
-    }
-}
-
-if (!function_exists('storage_private_url')) {
-
-    /**
-     * @param $object
-     * @param int $timeout
-     * @return string
-     */
-
-    function storage_private_url($object, $timeout = 60)
-    {
-        return empty($object) ? null : str_replace('http://', 'https://', str_replace(config('filesystems.disks.oss.bucket') . '.' . config('filesystems.disks.oss.endpoint'),
-            config('filesystems.disks.oss.host'), storage_private()->signUrl(config('filesystems.disks.oss.bucket'), $object, $timeout)));
-    }
-}
-
-if (!function_exists('storage_public_url')) {
-
-    /**
-     * @param $object
-     * @return string
-     */
-
-    function storage_public_url($object)
-    {
-        return empty($object) ? null : 'https://' . config('filesystems.disks.oss_public.host') . '/' . $object;
-    }
-}
-
-if (!function_exists('oss_upload_policy')) {
-
-    /**
-     * @param $key
-     * @param $secret
-     * @param $host
-     * @param int $timeout
-     * @param int $maxSize
-     * @return string
-     */
-
-    function oss_upload_policy($key, $secret, $host, $timeout = 5, $maxSize = 2097152)
-    {
-        $baseTime = Carbon\Carbon::now()->addMinutes($timeout);
-        $expiration = substr($baseTime->toIso8601String(), 0, strpos($baseTime->toIso8601String(), '+')) . "Z";
-        $conditions[] = ['content-length-range', 0, $maxSize];
-        $signArray = [
-            'expiration' => $expiration,
-            'conditions' => $conditions
-        ];
-        $policy = base64_encode(json_encode($signArray));
-        $sign = base64_encode(hash_hmac('sha1', $policy, $secret, true));
-        return success([
-            'AccessId' => $key,
-            'Host' => $host,
-            'Policy' => $policy,
-            'Signature' => $sign,
-            'Expire' => $expiration
-        ]);
-    }
-}
 
 if (!function_exists('code_version')) {
 
@@ -498,32 +356,3 @@ if (!function_exists('code_version')) {
     }
 }
 
-if (!function_exists('full_pinyin')) {
-
-    /**
-     * @param $string
-     * @return string
-     */
-
-    function full_pinyin($string)
-    {
-        return \App\Caches\Forever::getCache(sha1($string), ['pinyin'], function () use ($string) {
-            return implode('', app('pinyin')->convert($string));
-        });
-    }
-}
-
-if (!function_exists('short_pinyin')) {
-
-    /**
-     * @param $string
-     * @return string
-     */
-
-    function short_pinyin($string)
-    {
-        return \App\Caches\Forever::getCache(sha1($string), ['short_pinyin'], function () use ($string) {
-            return app('pinyin')->abbr($string);
-        });
-    }
-}

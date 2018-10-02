@@ -1,6 +1,6 @@
 <?php
 
-namespace Extend\Region;
+namespace ZhiEq\Region;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -14,12 +14,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $parent
  * @property string $code
  * @property string $phone
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region whereCode($value)
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region whereId($value)
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region whereLevel($value)
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region whereName($value)
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region whereParent($value)
- * @method static \Illuminate\Database\Query\Builder|\Extend\Region\Region wherePhone($value)
+ * @method static \Illuminate\Database\Query\Builder|Region whereCode($value)
+ * @method static \Illuminate\Database\Query\Builder|Region whereId($value)
+ * @method static \Illuminate\Database\Query\Builder|Region whereLevel($value)
+ * @method static \Illuminate\Database\Query\Builder|Region whereName($value)
+ * @method static \Illuminate\Database\Query\Builder|Region whereParent($value)
+ * @method static \Illuminate\Database\Query\Builder|Region wherePhone($value)
  * @mixin \Eloquent
  */
 class Region extends Model

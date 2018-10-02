@@ -4,15 +4,8 @@ namespace ZhiEq\Exceptions\ApiSignature;
 
 use Zhieq\Contracts\Exception;
 
-class SignatureInvalidException extends Exception
+class RequestContentTypeInvalidException extends Exception
 {
-    protected $signString;
-
-    public function __construct($signString)
-    {
-        $this->signString = $signString;
-        parent::__construct();
-    }
 
     /**
      * 唯一错误代码5位数字，不能以零开头
@@ -21,7 +14,7 @@ class SignatureInvalidException extends Exception
      */
     protected function errorCode()
     {
-        return 41201;
+        return 41203;
     }
 
     /**
@@ -31,7 +24,7 @@ class SignatureInvalidException extends Exception
      */
     protected function message()
     {
-        return 'Signature Invalid.';
+        return 'Header Content-Type Only Support "application/json"';
     }
 
     /**
@@ -71,6 +64,6 @@ class SignatureInvalidException extends Exception
      */
     protected function data()
     {
-        return ['signStr' => $this->signString];
+        return [];
     }
 }

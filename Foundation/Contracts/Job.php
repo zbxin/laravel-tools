@@ -6,8 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Monolog\Handler\BufferHandler;
-use Monolog\Logger;
 
 abstract class Job implements ShouldQueue
 {
@@ -26,21 +24,4 @@ abstract class Job implements ShouldQueue
     use InteractsWithQueue, Queueable, SerializesModels;
 
     abstract public function handle();
-
-    public function writeLog()
-    {
-        $logger = app('log');
-        if (env('APP_ENV') === 'testing') {
-            return;
-        }
-        $handlers = $logger instanceof Logger ? $logger->getHandlers() : $logger->getMonolog()->getHandlers();
-        foreach ($handlers as $handler) {
-            $handler instanceof BufferHandler && $handler->close();
-        }
-    }
-
-    public function __destruct()
-    {
-        //$this->writeLog();
-    }
 }

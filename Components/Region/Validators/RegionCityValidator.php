@@ -1,9 +1,9 @@
 <?php
 
-namespace Extend\Region\Validators;
+namespace ZhiEq\Region\Validators;
 
-use Extend\Contracts\Base\Validator;
-use Extend\Region\Region;
+use ZhiEq\Contracts\Validator;
+use ZhiEq\Region\Region;
 
 class RegionCityValidator extends Validator
 {

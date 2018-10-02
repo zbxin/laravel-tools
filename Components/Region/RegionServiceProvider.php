@@ -30,7 +30,7 @@ class RegionServiceProvider extends ServiceProvider
     public function boot()
     {
         foreach ($this->validators as $validator) {
-            $this->validator()->extend($validator, 'Extend\Region\Validators\\' . studly_case($validator) . 'Validator@validator');
+            $this->validator()->extend($validator, 'ZhiEq\Region\Validators\\' . studly_case($validator) . 'Validator@validator');
         }
     }
 }

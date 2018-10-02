@@ -1,12 +1,19 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace Zhieq\Middleware;
 
-use App\Exceptions\Headers\SignatureInvalidException;
 use Carbon\Carbon;
 use Closure;
 use Exception;
-use Log;
+use Illuminate\Support\Facades\Log;
+use ZhiEq\Exceptions\ApiSignature\AcceptTypeInvalidException;
+use ZhiEq\Exceptions\ApiSignature\BodyFormatInvalidException;
+use ZhiEq\Exceptions\ApiSignature\RepeatRequestException;
+use ZhiEq\Exceptions\ApiSignature\RequestContentTypeInvalidException;
+use ZhiEq\Exceptions\ApiSignature\RequestTimeInvalidException;
+use ZhiEq\Exceptions\ApiSignature\SignatureHeaderInvalidException;
+use ZhiEq\Exceptions\ApiSignature\SignatureInvalidException;
+use ZhiEq\Exceptions\ApiSignature\TimestampFormatInvalidException;
 
 class ApiSignature
 {
@@ -30,6 +37,7 @@ class ApiSignature
      * @param  \Illuminate\Http\Request $request
      * @param  \Closure $next
      * @return mixed
+     * @throws Exception
      */
     public function handle($request, Closure $next)
     {
@@ -37,42 +45,41 @@ class ApiSignature
          * 强制检查传入的body必须为json格式
          */
         if (!$request->isJson()) {
-            return errors('content-type only support application/json');
+            throw new RequestContentTypeInvalidException();
         }
         if (!$request->wantsJson()) {
-            return errors('accept only support application/json');
+            throw new AcceptTypeInvalidException();
         }
         if (!empty($request->getContent()) && empty($request->json())) {
-            return errors('body must be json format');
+            throw new BodyFormatInvalidException();
         }
         /*
          * 检查签名必须的字段
          */
         foreach ($this->requiredHeaders as $headerKey) {
             if (!$request->hasHeader($headerKey)) {
-                return errors($headerKey . ' required');
+                throw new SignatureHeaderInvalidException($headerKey);
             }
         }
         /*
          * 检验请求的时间与实际时间的偏差值，超过偏差值的请求会被拒绝，防止回放攻击
          */
-        info('request time' . $request->header('X-Ca-Timestamp'));
         try {
             $timeDiff = (new Carbon($request->header('X-Ca-Timestamp'), 'UTC'))->diffInSeconds(Carbon::now('UTC'), false);
             if ($timeDiff > 900 || $timeDiff < -900) {
-                return errors('request time must between server time +-15 minutes');
+                throw new RequestTimeInvalidException();
             }
         } catch (Exception $exception) {
-            return errors('X-Ca-Timestamp format invalid.must be format like 2017-01-01T00:00:00Z by UTC timezone');
+            throw new TimestampFormatInvalidException();
         }
         /*
          * 根据请求的路径和请求的随机数进行校验，保证在15分钟内只能请求一次，结合上述时间校验防止回放攻击
          */
         $uniqueRequestStr = sha1('/' . $request->path() . "\n" . $request->header('X-Ca-Nonce'));
         if (cache()->get($uniqueRequestStr)) {
-            return errors('request has handle');
+            throw new RepeatRequestException();
         }
-        cache()->put($uniqueRequestStr, app_id(), Carbon::now()->addMinutes(15));
+        cache()->put($uniqueRequestStr, Carbon::now()->timestamp, Carbon::now()->addMinutes(15));
         /*
          * 组装签名字符串的请求头部分
          */
@@ -90,7 +97,7 @@ class ApiSignature
             return $key . '=' . $value;
         })->toArray());
         /*
-         * 租装签名字符串
+         * 组装签名字符串
          */
         $signString = strtoupper($request->method()) . "\n"
             . $request->header('Content-Type') . "\n"
@@ -99,12 +106,16 @@ class ApiSignature
             . $request->header('X-Ca-Timestamp') . "\n"
             . $signHeaderString . "\n"
             . '/' . $request->path() . (empty($request->query()) ? '' : '?' . $signQueryString);
-        Log::info('sign str:' . $signString, ['secret' => config('gateway.application_signature_secret')]);
+        $signSecret = config('app.api_signature_secret');
         /*
          * 计算签名并对比请求的签名是否一致
          */
-        $signature = base64_encode(hash_hmac('sha256', $signString, config('gateway.application_signature_secret'), true));
-        Log::info('sign:' . $signature);
+        $signature = base64_encode(hash_hmac('sha256', $signString, $signSecret, true));
+        Log::info('api signature info', [
+            'signStr' => $signString,
+            'signSecret' => $signSecret,
+            'sign' => $signature,
+        ]);
         if ($signature !== $request->header('X-Ca-Signature')) {
             throw new SignatureInvalidException($signString);
         }

@@ -35,7 +35,7 @@ class GeeTestServiceProvider extends ServiceProvider
     }
 
     /**
-     * 
+     *
      */
 
     public function boot()

@@ -4,13 +4,13 @@ namespace ZhiEq\Exceptions\ApiSignature;
 
 use Zhieq\Contracts\Exception;
 
-class SignatureInvalidException extends Exception
+class SignatureHeaderInvalidException extends Exception
 {
-    protected $signString;
+    protected $header;
 
-    public function __construct($signString)
+    public function __construct($header)
     {
-        $this->signString = $signString;
+        $this->header = $header;
         parent::__construct();
     }
 
@@ -21,7 +21,7 @@ class SignatureInvalidException extends Exception
      */
     protected function errorCode()
     {
-        return 41201;
+        return 41207;
     }
 
     /**
@@ -31,7 +31,7 @@ class SignatureInvalidException extends Exception
      */
     protected function message()
     {
-        return 'Signature Invalid.';
+        return 'Header ' . $this->header . ' Required';
     }
 
     /**
@@ -71,6 +71,6 @@ class SignatureInvalidException extends Exception
      */
     protected function data()
     {
-        return ['signStr' => $this->signString];
+        return [];
     }
 }
