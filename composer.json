@@ -16,10 +16,20 @@
   },
   "autoload": {
     "psr-4": {
-      "ZhiEq\\": "/"
+      "ZhiEq\\": [
+        "/Components",
+        "/Foundation"
+      ]
     },
     "files": [
       "helpers.php"
     ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "ZhiEq\\GeeTest\\GeeTestServiceProvider"
+      ]
+    }
   }
 }
