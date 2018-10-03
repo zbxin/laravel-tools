@@ -22,13 +22,14 @@
       ]
     },
     "files": [
-      "helpers.php"
+      "Foundation/helpers.php"
     ]
   },
   "extra": {
     "laravel": {
       "providers": [
-        "ZhiEq\\GeeTest\\GeeTestServiceProvider"
+        "ZhiEq\\GeeTest\\GeeTestServiceProvider",
+        "ZhiEq\\Region\\RegionServiceProvider"
       ]
     }
   }

@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class RegionServiceProvider extends ServiceProvider
 {
+    protected $defer = true;
 
     protected $validators = [
         'region_exists',

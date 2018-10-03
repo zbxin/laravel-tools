@@ -5,6 +5,8 @@ namespace ZhiEq\GeeTest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 use Psr\SimpleCache\InvalidArgumentException;
+use ZhiEq\GeeTest\Exceptions\CaptchaTimeoutException;
+use ZhiEq\GeeTest\Library\GeeTestLib;
 
 class GeeTest
 {

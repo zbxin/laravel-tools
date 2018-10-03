@@ -18,7 +18,7 @@ class GeeTestServiceProvider extends ServiceProvider
 
     protected function configPath()
     {
-        return __DIR__ . '/gee_test.php';
+        return __DIR__ . '/config/gee_test.php';
     }
 
     /**

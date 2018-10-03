@@ -18,23 +18,23 @@ if (!function_exists('errors')) {
     {
         logs()->info('request return error at:' . microtime(true));
         $returnInfo = [
-            'Request' => app_id(),
+            'request' => app_id(),
         ];
         if ($message instanceof \Zhieq\Contracts\Exception) {
-            $returnInfo['Code'] = $message->getCode();
-            $returnInfo['Message'] = $message->getMessage();
-            $returnInfo['Data'] = $message->getData();
+            $returnInfo['code'] = $message->getCode();
+            $returnInfo['message'] = $message->getMessage();
+            $returnInfo['data'] = filter_null($message->getData());
             if (is_debug() && !is_test()) {
-                $returnInfo['Debug'] = $message->getDebug();
-                $returnInfo['Exception'] = $message->getTraceAsString();
+                $returnInfo['debug'] = $message->getDebug();
+                $returnInfo['exception'] = $message->getTraceAsString();
             }
             $status = $message->getStatusCode();
             $headers = $message->getHeaders();
         } else {
             $code = $code === 1 ? 99999 : $code;
-            $returnInfo['Code'] = $code;
-            $returnInfo['Message'] = $message;
-            !empty($data) && $returnInfo['Data'] = filter_null($data);
+            $returnInfo['code'] = $code;
+            $returnInfo['message'] = $message;
+            !empty($data) && $returnInfo['data'] = filter_null($data);
         }
         logs()->error('request has something errors', $returnInfo);
         return response()->json($returnInfo, $status, $headers, $encodingOptions);
@@ -56,10 +56,10 @@ if (!function_exists('success')) {
     {
         logs()->info('request return success at:' . microtime(true));
         $returnData = [
-            'Request' => app_id(),
-            'Code' => 0,
-            'Message' => $message === null ? trans('request_handle_successful') : $message,
-            'Data' => is_string($data) ? $data : (is_array($data) ? filter_null(studly_case_array_keys($data)) : filter_null(studly_case_array_keys(collect($data)->toArray()))),
+            'request' => app_id(),
+            'code' => 0,
+            'message' => $message === null ? trans('request_handle_successful') : $message,
+            'data' => is_string($data) ? $data : (is_array($data) ? filter_null($data) : filter_null(collect($data)->toArray())),
         ];
         logs()->info('request return success data', $returnData);
         return response()->json($returnData, 200, $headers, $encodingOptions);

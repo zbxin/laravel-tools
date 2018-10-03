@@ -1,6 +1,6 @@
 <?php
 
-namespace Zhieq\Middleware;
+namespace ZhiEq\Middleware;
 
 use Carbon\Carbon;
 use Closure;
@@ -15,7 +15,7 @@ use ZhiEq\Exceptions\ApiSignature\SignatureHeaderInvalidException;
 use ZhiEq\Exceptions\ApiSignature\SignatureInvalidException;
 use ZhiEq\Exceptions\ApiSignature\TimestampFormatInvalidException;
 
-class ApiSignature
+class VerifyApiSignature
 {
 
     protected $requiredHeaders = [
