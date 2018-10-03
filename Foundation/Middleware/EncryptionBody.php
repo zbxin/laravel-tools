@@ -4,7 +4,9 @@ namespace ZhiEq\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use ZhiEq\Contracts\MiddlewareExceptRoute;
+use ZhiEq\Utils\AESEncrypt;
 
 class EncryptionBody extends MiddlewareExceptRoute
 {
@@ -16,6 +18,13 @@ class EncryptionBody extends MiddlewareExceptRoute
      */
     public function subHandle($request, Closure $next)
     {
-        // TODO: Implement subHandle() method.
+        /**
+         * @var Response $response
+         */
+        $response = $next($request);
+        if (!empty($response->getContent())) {
+            $response->setContent(AESEncrypt::quickEncrypt($response->getContent()));
+        }
+        return $response;
     }
 }

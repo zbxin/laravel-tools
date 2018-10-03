@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use ZhiEq\Contracts\MiddlewareExceptRoute;
 
-class CamelCaseOutputJson extends MiddlewareExceptRoute
+class StudlyCaseOutputJson extends MiddlewareExceptRoute
 {
 
     /**
@@ -21,8 +21,8 @@ class CamelCaseOutputJson extends MiddlewareExceptRoute
          * @var Response $response
          */
         $response = $next($request);
-        if(!empty($response->getContent()) && !empty(json_decode($response->getContent(), true))){
-            $response->setContent(json_encode(camel_case_array_keys(json_decode($response->getContent(), true))));
+        if (!empty($response->getContent()) && !empty(json_decode($response->getContent(), true))) {
+            $response->setContent(json_encode(studly_case_array_keys(json_decode($response->getContent(), true))));
         }
         return $response;
     }
