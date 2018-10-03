@@ -2,7 +2,7 @@
 
 namespace ZhiEq\Exceptions\ApiSignature;
 
-use Zhieq\Contracts\Exception;
+use ZhiEq\Contracts\Exception;
 
 class SignatureHeaderInvalidException extends Exception
 {
