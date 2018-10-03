@@ -1,6 +1,6 @@
 <?php
 
-namespace Extend\Region;
+namespace ZhiEq\Region;
 
 use Illuminate\Support\ServiceProvider;
 

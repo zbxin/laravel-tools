@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Query\Builder|Region whereName($value)
  * @method static \Illuminate\Database\Query\Builder|Region whereParent($value)
  * @method static \Illuminate\Database\Query\Builder|Region wherePhone($value)
- * @mixin \Eloquent
  */
 class Region extends Model
 {
@@ -50,11 +49,21 @@ class Region extends Model
         return self::whereLevel(1)->get();
     }
 
+    /**
+     * @param null $province_id
+     * @return \Illuminate\Support\Collection
+     */
+
     public static function cityList($province_id = null)
     {
         $province_id = $province_id === null ? self::provinceList()->first()->id : $province_id;
         return self::whereParent($province_id)->whereLevel(2)->get();
     }
+
+    /**
+     * @param null $city_id
+     * @return \Illuminate\Support\Collection
+     */
 
     public static function countyList($city_id = null)
     {
@@ -62,12 +71,22 @@ class Region extends Model
         return self::whereLevel(3)->whereParent($city_id)->get();
     }
 
+    /**
+     *
+     * @param $id
+     * @return mixed|string
+     */
+
     public static function getName($id)
     {
-        return \Cache::tags(['region', 'model', 'name'])->remember($id, Carbon::now()->addHours(1), function () use ($id) {
-            $model = self::find($id);
-            return empty($model) ? '' : $model->name;
-        });
+        try {
+            return cache()->tags(['region', 'model', 'name'])->remember($id, Carbon::now()->addHours(1), function () use ($id) {
+                $model = self::whereId($id)->first();
+                return empty($model) ? '' : $model->name;
+            });
+        } catch (\Exception $exception) {
+            return '';
+        }
     }
 
 }
