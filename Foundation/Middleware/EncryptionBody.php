@@ -23,7 +23,7 @@ class EncryptionBody extends MiddlewareExceptRoute
          */
         $response = $next($request);
         if (!empty($response->getContent())) {
-            $response->setContent(AESEncrypt::quickEncrypt($response->getContent()));
+            $response->setContent(json_encode(['encryptionData' => AESEncrypt::quickEncrypt($response->getContent())]));
         }
         return $response;
     }
