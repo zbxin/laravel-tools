@@ -6,11 +6,6 @@ use Illuminate\Support\ServiceProvider;
 
 class GeeTestServiceProvider extends ServiceProvider
 {
-    /**
-     * @var bool
-     */
-
-    protected $defer = true;
 
     /**
      * @return string
