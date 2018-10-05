@@ -24,7 +24,8 @@ class ApiSignatureGuzzleMiddleware
     {
         $excludeList = [
             'User-Agent',
-            'Host'
+            'Host',
+            'Content-Length',
         ];
         return in_array($header, $excludeList);
     }

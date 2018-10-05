@@ -29,6 +29,12 @@ class DecryptionBodyGuzzleMiddleware
             $promise = $handler($request, $options);
             return $promise->then(
                 function (ResponseInterface $response) {
+                    $content = $response->getBody()->getContents();
+                    $encryptData = !empty($content) ? json_decode($content, true) : null;
+                    $encryptData = isset($encryptData['encryptionData']) ? $encryptData['encryptionData'] : null;
+                    if (!empty($encryptData)) {
+                        $response->withBody(\GuzzleHttp\Psr7\stream_for(json_decode(AESEncrypt::quickDecrypt($encryptData), true)));
+                    }
                     return $response;
                 }
             );

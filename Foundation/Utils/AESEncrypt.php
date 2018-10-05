@@ -34,7 +34,7 @@ class AESEncrypt
 
     protected static function key()
     {
-        return env('AES_SECRET_KEY', '');
+        return config('tools.aes_secret_key');
     }
 
     /**

@@ -17,10 +17,10 @@ class EncryptionBodyGuzzleMiddleware
     public function __invoke(callable $handler)
     {
         return function (RequestInterface $request, array $options) use ($handler) {
-            $body = $request->getBody();
-            var_dump($body->getContents());
-            $body->write('dddd');
-            var_dump($body->getContents());
+            $content = $request->getBody()->getContents();
+            if (!empty($content)) {
+                $request = $request->withBody(\GuzzleHttp\Psr7\stream_for(json_encode(['encryptionData' => AESEncrypt::quickEncrypt($content)])));
+            }
             return $handler($request, $options);
         };
     }
