@@ -109,7 +109,7 @@ class VerifyApiSignature
             . $request->header('X-Ca-Timestamp') . "\n"
             . $signHeaderString . "\n"
             . '/' . $request->path() . (empty($request->query()) ? '' : '?' . $signQueryString);
-        $signSecret = config('app.api_signature_secret');
+        $signSecret = config('tools.api_signature_secret');
         /*
          * 计算签名并对比请求的签名是否一致
          */

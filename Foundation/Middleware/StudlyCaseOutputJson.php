@@ -5,10 +5,13 @@ namespace ZhiEq\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use ZhiEq\Constant;
 use ZhiEq\Contracts\MiddlewareExceptRoute;
+use ZhiEq\Utils\ConvertJsonKeyFormat;
 
 class StudlyCaseOutputJson extends MiddlewareExceptRoute
 {
+    use ConvertJsonKeyFormat;
 
     /**
      * @param Request $request
@@ -22,7 +25,7 @@ class StudlyCaseOutputJson extends MiddlewareExceptRoute
          */
         $response = $next($request);
         if (!empty($response->getContent()) && !empty(json_decode($response->getContent(), true))) {
-            $response->setContent(json_encode(studly_case_array_keys(json_decode($response->getContent(), true))));
+            $response->setContent($this->convertJsonKeyFormat($response->getContent(), Constant::JSON_KEY_FORMAT_STUDLY_CASE));
         }
         return $response;
     }

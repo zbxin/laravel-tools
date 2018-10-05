@@ -1,6 +1,6 @@
 <?php
 
-namespace Zhieq\Contracts;
+namespace ZhiEq\Contracts;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 

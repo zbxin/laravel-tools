@@ -30,7 +30,8 @@
     "laravel": {
       "providers": [
         "ZhiEq\\GeeTest\\GeeTestServiceProvider",
-        "ZhiEq\\Region\\RegionServiceProvider"
+        "ZhiEq\\Region\\RegionServiceProvider",
+        "ZhiEq\\ZhiEqToolsServiceProvider"
       ]
     }
   }
