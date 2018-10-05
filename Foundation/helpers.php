@@ -311,6 +311,22 @@ if (!function_exists('app_id')) {
 
     function app_id()
     {
+        if (config('app.id') === null) {
+            config('app.id', uuid());
+        }
+        return config('app.id');
+    }
+}
+
+
+if (!function_exists('uuid')) {
+
+    /**
+     * @return string
+     */
+
+    function uuid()
+    {
         try {
             return \Ramsey\Uuid\Uuid::uuid4()->toString();
         } catch (Exception $exception) {
@@ -334,8 +350,8 @@ if (!function_exists('app_id')) {
                 mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
             );
         }
-
     }
+
 }
 
 

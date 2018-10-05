@@ -60,7 +60,7 @@ class ApiSignatureGuzzleMiddleware
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'X-Ca-Timestamp' => Carbon::now('UTC')->format('Y-m-dTH:i:s') . 'Z',
-            'X-Ca-Nonce' => str_random(40),
+            'X-Ca-Nonce' => uuid(),
         ];
     }
 
