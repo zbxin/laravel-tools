@@ -61,7 +61,7 @@ class VerifyApiSignature
                 throw new SignatureHeaderInvalidException($headerKey);
             }
         }
-        if (strlen($request->header('X-Ca-Nonce')) !== 37) {
+        if (strlen($request->header('X-Ca-Nonce')) !== 36) {
             throw new HeaderNonceLengthInvalidException();
         }
         /*

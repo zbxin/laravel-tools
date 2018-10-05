@@ -26,4 +26,11 @@ class ZhiEqToolsServiceProvider extends ServiceProvider
             $this->configPath() => config_path('tools.php'),
         ]);
     }
+
+    public function register()
+    {
+        $this->mergeConfigFrom(
+            $this->configPath(), 'tools'
+        );
+    }
 }
