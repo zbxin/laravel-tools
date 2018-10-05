@@ -116,6 +116,7 @@ class VerifyApiSignature
         $signature = base64_encode(hash_hmac('sha256', $signString, $signSecret, true));
         logs()->info('api signature info', [
             'signStr' => $signString,
+            'signStrHash' => sha1($signString),
             'signSecret' => $signSecret,
             'sign' => $signature,
         ]);

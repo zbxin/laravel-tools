@@ -58,15 +58,16 @@ class ApiSignatureGuzzleMiddleware
             })->implode('&');
             $signString = strtoupper($request->getMethod()) . "\n"
                 . $request->getHeader('Content-Type')[0] . "\n"
-                . '' . "\n"
+                . $this->getContentEncode($request) . "\n"
                 . $request->getHeader('Accept')[0] . "\n"
                 . $request->getHeader('X-Ca-Timestamp')[0] . "\n"
-                . $signHeaderString . " \n"
+                . $signHeaderString . "\n"
                 . $request->getUri()->getPath() . (empty($request->getUri()->getQuery()) ? '' : '?' . $signQueryString);
             $signature = base64_encode(hash_hmac('sha256', $signString, $this->signSecret, true));
             $request = $request->withHeader('X-Ca-Signature', $signature);
             logs()->info('request api signature', [
                 'signString' => $signString,
+                'signStrHash' => sha1($signString),
                 'signSecret' => $this->signSecret,
                 'signature' => $signature,
             ]);
@@ -82,6 +83,20 @@ class ApiSignatureGuzzleMiddleware
             'X-Ca-Timestamp' => Carbon::now('UTC')->format('Y-m-dTH:i:s') . 'Z',
             'X-Ca-Nonce' => uuid(),
         ];
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @return string
+     */
+
+    protected function getContentEncode(RequestInterface $request)
+    {
+        if (in_array($request->getMethod(), ['GET', 'DELETE'])) {
+            return '';
+        }
+        $content = $request->getBody()->getContents();
+        return (empty($content) ? '' : base64_encode(md5($content, true)));
     }
 
 }
