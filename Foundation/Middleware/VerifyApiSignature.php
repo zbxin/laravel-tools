@@ -5,9 +5,9 @@ namespace ZhiEq\Middleware;
 use Carbon\Carbon;
 use Closure;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use ZhiEq\Exceptions\ApiSignature\AcceptTypeInvalidException;
 use ZhiEq\Exceptions\ApiSignature\BodyFormatInvalidException;
+use ZhiEq\Exceptions\ApiSignature\HeaderNonceLengthInvalidException;
 use ZhiEq\Exceptions\ApiSignature\RepeatRequestException;
 use ZhiEq\Exceptions\ApiSignature\RequestContentTypeInvalidException;
 use ZhiEq\Exceptions\ApiSignature\RequestTimeInvalidException;
@@ -61,6 +61,9 @@ class VerifyApiSignature
                 throw new SignatureHeaderInvalidException($headerKey);
             }
         }
+        if (strlen($request->header('X-Ca-Nonce')) !== 40) {
+            throw new HeaderNonceLengthInvalidException();
+        }
         /*
          * 检验请求的时间与实际时间的偏差值，超过偏差值的请求会被拒绝，防止回放攻击
          */
@@ -111,7 +114,7 @@ class VerifyApiSignature
          * 计算签名并对比请求的签名是否一致
          */
         $signature = base64_encode(hash_hmac('sha256', $signString, $signSecret, true));
-        Log::info('api signature info', [
+        logs()->info('api signature info', [
             'signStr' => $signString,
             'signSecret' => $signSecret,
             'sign' => $signature,
