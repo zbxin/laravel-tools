@@ -16,6 +16,20 @@ class ApiSignatureGuzzleMiddleware
     }
 
     /**
+     * @param $header
+     * @return bool
+     */
+
+    public function isExcludeHeaders($header)
+    {
+        $excludeList = [
+            'User-Agent',
+            'Host'
+        ];
+        return in_array($header, $excludeList);
+    }
+
+    /**
      * Called when the middleware is handled.
      *
      * @param callable $handler
@@ -26,10 +40,13 @@ class ApiSignatureGuzzleMiddleware
     {
         return function (RequestInterface $request, array $options) use ($handler) {
             foreach ($this->baseHeaders() as $headerKey => $headerValue) {
-                $request->withAddedHeader($headerKey, $headerValue);
+                $request = $request->withHeader($headerKey, $headerValue);
             }
-            $signHeaders = $request->getHeaders();
-            $request->withAddedHeader('X-Ca-Signature-Headers', implode(',', $signHeaders));
+            $signHeaders = [];
+            foreach ($request->getHeaders() as $key => $headers) {
+                if (!$this->isExcludeHeaders($key)) $signHeaders[$key] = $headers[0];
+            }
+            $request = $request->withHeader('X-Ca-Signature-Headers', implode(',', $signHeaders));
             ksort($signHeaders);
             $signHeaderString = collect($signHeaders)->map(function ($headerValue, $headerKey) {
                 return $headerKey . '=' . $headerValue;
@@ -49,7 +66,7 @@ class ApiSignatureGuzzleMiddleware
             logs()->info('request api signature', [
                 'signString' => $signString,
             ]);
-            $request->withAddedHeader('X-Ca-Signature', base64_encode(hash_hmac('sha256', $signString, $this->signSecret, true)));
+            $request = $request->withHeader('X-Ca-Signature', base64_encode(hash_hmac('sha256', $signString, $this->signSecret, true)));
             return $handler($request, $options);
         };
     }
