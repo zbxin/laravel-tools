@@ -46,7 +46,7 @@ class ApiSignatureGuzzleMiddleware
             foreach ($request->getHeaders() as $key => $headers) {
                 if (!$this->isExcludeHeaders($key)) $signHeaders[$key] = $headers[0];
             }
-            $request = $request->withHeader('X-Ca-Signature-Headers', implode(',', $signHeaders));
+            $request = $request->withHeader('X-Ca-Signature-Headers', implode(',', array_keys($signHeaders)));
             ksort($signHeaders);
             $signHeaderString = collect($signHeaders)->map(function ($headerValue, $headerKey) {
                 return $headerKey . '=' . $headerValue;
@@ -54,7 +54,7 @@ class ApiSignatureGuzzleMiddleware
             $signQuery = parse_query($request->getUri()->getQuery());
             ksort($signQuery);
             $signQueryString = collect($signQuery)->map(function ($queryValue, $queryKey) {
-                return $queryKey . '=' . $queryValue;
+                return $queryKey . ':' . $queryValue;
             })->implode('&');
             $signString = strtoupper($request->getMethod()) . "\n"
                 . $request->getHeader('Content-Type')[0] . "\n"
@@ -63,10 +63,13 @@ class ApiSignatureGuzzleMiddleware
                 . $request->getHeader('X-Ca-Timestamp')[0] . "\n"
                 . $signHeaderString . " \n"
                 . $request->getUri()->getPath() . (empty($request->getUri()->getQuery()) ? '' : '?' . $signQueryString);
+            $signature = base64_encode(hash_hmac('sha256', $signString, $this->signSecret, true));
+            $request = $request->withHeader('X-Ca-Signature', $signature);
             logs()->info('request api signature', [
                 'signString' => $signString,
+                'signSecret' => $this->signSecret,
+                'signature' => $signature,
             ]);
-            $request = $request->withHeader('X-Ca-Signature', base64_encode(hash_hmac('sha256', $signString, $this->signSecret, true)));
             return $handler($request, $options);
         };
     }
