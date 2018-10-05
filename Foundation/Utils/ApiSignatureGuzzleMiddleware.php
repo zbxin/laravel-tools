@@ -49,7 +49,7 @@ class ApiSignatureGuzzleMiddleware
             $request = $request->withHeader('X-Ca-Signature-Headers', implode(',', array_keys($signHeaders)));
             ksort($signHeaders);
             $signHeaderString = collect($signHeaders)->map(function ($headerValue, $headerKey) {
-                return $headerKey . '=' . $headerValue;
+                return $headerKey . ':' . $headerValue;
             })->implode("\n");
             $signQuery = parse_query($request->getUri()->getQuery());
             ksort($signQuery);
