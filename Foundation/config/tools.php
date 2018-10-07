@@ -12,4 +12,14 @@ return [
 
     //加密算法密钥
     'aes_secret_key' => env('AES_SECRET_KEY'),
+
+    //定时任务
+    /**
+     * [
+     *      ['command'=>'xxx','interval'=>10,'align'=>0]
+     * ]
+     */
+    'cron_tasks' => [
+
+    ],
 ];
