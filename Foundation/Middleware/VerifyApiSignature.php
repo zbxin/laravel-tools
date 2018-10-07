@@ -5,6 +5,8 @@ namespace ZhiEq\Middleware;
 use Carbon\Carbon;
 use Closure;
 use Exception;
+use Illuminate\Http\Request;
+use ZhiEq\Contracts\MiddlewareExceptRoute;
 use ZhiEq\Exceptions\ApiSignature\AcceptTypeInvalidException;
 use ZhiEq\Exceptions\ApiSignature\BodyFormatInvalidException;
 use ZhiEq\Exceptions\ApiSignature\HeaderNonceLengthInvalidException;
@@ -15,7 +17,7 @@ use ZhiEq\Exceptions\ApiSignature\SignatureHeaderInvalidException;
 use ZhiEq\Exceptions\ApiSignature\SignatureInvalidException;
 use ZhiEq\Exceptions\ApiSignature\TimestampFormatInvalidException;
 
-class VerifyApiSignature
+class VerifyApiSignature extends MiddlewareExceptRoute
 {
 
     protected $requiredHeaders = [
@@ -32,18 +34,30 @@ class VerifyApiSignature
     ];
 
     /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure $next
+     * @param \Illuminate\Http\Request $request
+     * @return string
+     */
+
+    protected function getContentEncode($request)
+    {
+        if (env('APP_ENV') === 'testing' && ($request->getMethod() === 'GET' || $request->getMethod() === 'DELETE')) {
+            return '';
+        }
+        return (empty($request->getContent()) ? '' : base64_encode(md5($request->getContent(), true)));
+    }
+
+    /**
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      * @throws Exception
      */
-    public function handle($request, Closure $next)
+
+    public function subHandle($request, Closure $next)
     {
         /*
-         * 强制检查传入的body必须为json格式
-         */
+        * 强制检查传入的body必须为json格式
+        */
         if (!$request->isJson()) {
             throw new RequestContentTypeInvalidException();
         }
@@ -124,18 +138,5 @@ class VerifyApiSignature
             throw new SignatureInvalidException($signString);
         }
         return $next($request);
-    }
-
-    /**
-     * @param \Illuminate\Http\Request $request
-     * @return string
-     */
-
-    protected function getContentEncode($request)
-    {
-        if (env('APP_ENV') === 'testing' && ($request->getMethod() === 'GET' || $request->getMethod() === 'DELETE')) {
-            return '';
-        }
-        return (empty($request->getContent()) ? '' : base64_encode(md5($request->getContent(), true)));
     }
 }
