@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Extend;
+namespace ZhiEq\Utils;
 
-use Cache;
 use Closure;
 use Illuminate\Support\Facades\Redis;
+
+/**
+ * Class CodeGenerator
+ * @package ZhiEq\Utils
+ */
 
 class CodeGenerator
 {
@@ -21,6 +25,11 @@ class CodeGenerator
         return 'code-generator:' . $key;
     }
 
+    /**
+     * @param $type
+     * @return array
+     */
+
     protected static function getMapList($type)
     {
         if ($type === self::TYPE_ONLY_NUMBER) {
@@ -34,41 +43,51 @@ class CodeGenerator
         }
     }
 
+    /**
+     * @param $max
+     * @param $len
+     * @param int $type
+     * @param string $prefix
+     * @param int $firstMin
+     * @param string $firstMax
+     * @return null|string
+     */
+
     public static function getNext($max, $len, $type = self::TYPE_NUMBER_AND_LETTER, $prefix = '', $firstMin = 1, $firstMax = 'Z')
     {
         if ($len < 1 || !is_numeric($len)) {
-            info('$len not numeric or less one');
+            logs()->info('$len not numeric or less one');
             return null;
         }
         if (strlen($max) > $len) {
-            info('$max code length more than to $len');
+            logs()->info('$max code length more than to $len');
             return null;
         }
         $map = self::getMapList($type);
-        info('map list', $map);
+        logs()->info('map list', $map);
         $max = str_pad($max, $len, '0', STR_PAD_LEFT);
-        info('padding $max to:' . $max);
+        logs()->info('padding $max to:' . $max);
         $first = substr($max, 0, 1);
-        info('first letter is:' . $first);
+        logs()->info('first letter is:' . $first);
         $firstPosition = self::getPosition($first, $map);
         $firstMinPosition = self::getPosition($firstMin, $map);
         $firstMaxPosition = self::getPosition($firstMax, $map);
-        info('map position', ['firstPosition' => $firstPosition, 'firstMinPosition' => $firstMinPosition, 'firstMaxPosition' => $firstMaxPosition]);
+        logs()->info('map position', ['firstPosition' => $firstPosition, 'firstMinPosition' => $firstMinPosition, 'firstMaxPosition' => $firstMaxPosition]);
         if ($firstPosition === false || $firstMinPosition === false || $firstMaxPosition === false) {
-            info('position letter invalid');
+            logs()->info('position letter invalid');
             return null;
         }
         if ($firstPosition < $firstMinPosition) {
             $max = $firstMin . substr($max, 1, $len - 1);
         }
-        info('first letter check $max:' . $max);
+        logs()->info('first letter check $max:' . $max);
         if ($firstPosition > $firstMaxPosition) {
             return null;
         }
         $final = [];
         for ($i = 1; $i <= $len; $i++) {
             $result = self::getNextCharacter($map, $max, $i);
-            info('next character:', ['next' => $result]);
+            logs()->info('next character:', ['next' => $result]);
             if ($result === false) {
                 return null;
             }
@@ -80,37 +99,65 @@ class CodeGenerator
                 $final[] = $map[0];
             }
         }
-        info('final str', $final);
+        logs()->info('final str', $final);
         $diff = $len - count($final);
-        info('diff:' . $diff);
+        logs()->info('diff:' . $diff);
         $finalStr = substr($max, 0, $diff) . implode('', array_reverse($final));
-        info('finalStr:' . $finalStr);
+        logs()->info('finalStr:' . $finalStr);
         $firstPosition = self::getPosition(substr($finalStr, 0, 1), $map);
-        info('check final str first position:' . $firstPosition);
+        logs()->info('check final str first position:' . $firstPosition);
         return $firstPosition > $firstMaxPosition ? null : $prefix . $finalStr;
     }
+
+    /**
+     * @param $map
+     * @param $max
+     * @param $reciprocal
+     * @return bool
+     */
 
     protected static function getNextCharacter($map, $max, $reciprocal)
     {
         $character = substr($max, -$reciprocal, 1);
-        info('search letter:' . $character);
+        logs()->info('search letter:' . $character);
         $now = self::getPosition($character, $map);
-        info('search result', ['now' => $now]);
+        logs()->info('search result', ['now' => $now]);
         if ($now === false) {
             return false;
         }
         return $now === max(array_flip($map)) ? true : $map[$now + 1];
     }
 
+    /**
+     * @param $character
+     * @param $map
+     * @return false|int|string
+     */
+
     protected static function getPosition($character, $map)
     {
         return array_search(strtoupper($character), $map, true);
     }
 
+    /**
+     * @return mixed
+     */
+
     protected static function redis()
     {
-        return Redis::connection();
+        return Redis::connection()->client();
     }
+
+    /**
+     * @param $uniqueKey
+     * @param Closure $maxCallback
+     * @param $len
+     * @param int $type
+     * @param string $prefix
+     * @param int $firstMin
+     * @param string $firstMax
+     * @return null|string
+     */
 
     public static function getUniqueCode($uniqueKey, Closure $maxCallback, $len, $type = self::TYPE_NUMBER_AND_LETTER, $prefix = '', $firstMin = 1, $firstMax = 'Z')
     {

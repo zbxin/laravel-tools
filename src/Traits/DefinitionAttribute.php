@@ -1,6 +1,11 @@
 <?php
 
-namespace App\Extend;
+namespace ZhiEq\Traits;
+
+/**
+ * Trait DefinitionAttribute
+ * @package ZhiEq\Traits
+ */
 
 trait DefinitionAttribute
 {

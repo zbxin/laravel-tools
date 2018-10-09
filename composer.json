@@ -11,26 +11,24 @@
   ],
   "require": {
     "laravel/framework": "5.*",
-    "ext-openssl": "*",
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^6.3"
+    "zhieq/laravel-region": "^1.0",
+    "zhieq/laravel-gee-test": "^1.0",
+    "zhieq/laravel-contracts": "^1.0",
+    "zhieq/laravel-api-signature-middleware": "^1.0",
+    "zhieq/laravel-case-json-middleware": "^1.0",
+    "zhieq/laravel-encrypt-middleware": "^1.0",
+    "zhieq/laravel-api-token-auth": "^1.0",
+    "zhieq/laravel-supports": "^1.0"
   },
   "autoload": {
     "psr-4": {
-      "ZhiEq\\": [
-        "/Components",
-        "/Foundation"
-      ]
-    },
-    "files": [
-      "Foundation/helpers.php"
-    ]
+      "ZhiEq\\": "src"
+    }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "ZhiEq\\GeeTest\\GeeTestServiceProvider",
-        "ZhiEq\\Region\\RegionServiceProvider",
         "ZhiEq\\ZhiEqToolsServiceProvider"
       ]
     }

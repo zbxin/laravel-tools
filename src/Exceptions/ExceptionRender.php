@@ -7,13 +7,12 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Debug\Exception\FlattenException;
+use ZhiEq\CaseJson\ConvertJsonKeyFormat;
+use ZhiEq\CaseJson\Exceptions\JsonKeyFormatInvalidException;
 use ZhiEq\Contracts\Exception as CustomBaseException;
-use ZhiEq\Exceptions\ConvertJsonKeyFormat\JsonKeyFormatInvalidException;
-use ZhiEq\Utils\ConvertJsonKeyFormat;
 
 trait ExceptionRender
 {
-    use ConvertJsonKeyFormat;
 
     /**
      * @param Request $request
@@ -58,7 +57,7 @@ trait ExceptionRender
     protected function renderError($message, $code = 1, $data = [], $status = 500, $headers = [], $encodingOptions = JSON_UNESCAPED_UNICODE)
     {
         $response = errors($message, $code, $data, $status, $headers, $encodingOptions);
-        $response->setContent($this->convertJsonKeyFormat($response->getContent(), config('tools.case_output_format')));
+        $response->setContent(ConvertJsonKeyFormat::convertJsonKeyFormat($response->getContent(), config('tools.case_output_format')));
         return $response;
     }
 }

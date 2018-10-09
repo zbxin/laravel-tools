@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
 
+/**
+ * Class SearchKeyword
+ * @package ZhiEq\Utils
+ */
+
 class SearchKeyword
 {
     const SEARCH_KEYWORD_TYPE_LIKE = 'like';//模糊搜索
@@ -32,7 +37,7 @@ class SearchKeyword
          */
         return $query->where(function (Builder $subQuery) use ($searchKeywords, $rules, $customQuery) {
             foreach ($rules as $rule) {
-                info('action rule', $rule);
+                logs()->info('action rule', $rule);
                 $subQuery = SearchKeyword::getQueryByRuleFromRequest($searchKeywords, $rule, $subQuery);
             }
             logs()->info('search query sql:', ['sql' => $subQuery->toSql()]);
