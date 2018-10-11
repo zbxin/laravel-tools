@@ -94,11 +94,7 @@ class CronTask extends Command
         }, $this->tasks);
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
+
     public function handle()
     {
         $this->recordInfo('Begin Run Cron Listen At:' . $this->nowTime());
