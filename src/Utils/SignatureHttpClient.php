@@ -17,8 +17,8 @@ class SignatureHttpClient extends Client
     public function __construct($configs = [])
     {
         $stack = HandlerStack::create();
-        $signatureMiddleware = new ApiSignatureGuzzleMiddleware(config('tools.api_signature_secret'));
-        $caseMiddleware = new CaseResponseGuzzleMiddleware(config('tools.case_input_format'));
+        $signatureMiddleware = new ApiSignatureGuzzleMiddleware(isset($configs['signatureSecret']) ? $configs['signatureSecret'] : config('tools.api_signature_secret'));
+        $caseMiddleware = new CaseResponseGuzzleMiddleware(isset($configs['caseFormat']) ? $configs['caseFormat'] : config('tools.case_input_format'));
         $stack->push($signatureMiddleware);
         $stack->push($caseMiddleware);
         $configs = array_merge($configs, ['handler' => $stack]);
