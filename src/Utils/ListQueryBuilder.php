@@ -3,7 +3,7 @@
 namespace ZhiEq\Utils;
 
 use Closure;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Psr\Log\InvalidArgumentException;
 
@@ -122,7 +122,11 @@ class ListQueryBuilder
 
     protected function resolveConfigs(array $configs)
     {
-
+        collect([
+            'pageKey', 'perPageKey', 'orderFieldKey', 'orderTypeKey', 'searchKeywordKey'
+        ])->each(function ($key) use ($configs) {
+            $this->$key = isset($configs[$key]) ? $configs[$key] : $this->$key;
+        });
     }
 
     /**
