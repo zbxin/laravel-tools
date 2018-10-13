@@ -4,7 +4,9 @@ namespace ZhiEq\Utils;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Psr\Log\InvalidArgumentException;
 
 class ListQueryBuilder
@@ -90,6 +92,36 @@ class ListQueryBuilder
 
     private $searchRules = [];
 
+    /**
+     * @var bool
+     */
+
+    private $isEmptySearch = false;
+
+    /**
+     * @var array
+     */
+
+    private $hidden = [];
+
+    /**
+     * @var array
+     */
+
+    private $append = [];
+
+    /**
+     * @var array
+     */
+
+    private $visible = [];
+
+    /**
+     * @var array
+     */
+
+    private $needField = [];
+
 
     /**
      * ListQueryBuilder constructor.
@@ -166,7 +198,9 @@ class ListQueryBuilder
 
     public function query()
     {
-        return $this->query;
+        $query = $this->query;
+        $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
+        return $query;
     }
 
     /**
@@ -229,9 +263,11 @@ class ListQueryBuilder
     public function withSearch(array $searchRules, $allowEmpty = false, Closure $customQuery = null)
     {
         if ($this->checkSearchKeywordsIsAllEmpty() && $allowEmpty === false) {
+            $this->isEmptySearch = true;
             return $this;
         }
         $this->query = SearchKeyword::query($this->getSearchKeywordsFromRequest(), $this->query, $searchRules, $customQuery);
+        logs()->info('search sql:' . $this->query->toSql());
         return $this;
     }
 
@@ -243,6 +279,7 @@ class ListQueryBuilder
     {
         $searchKeywords = $this->request->header($this->searchKeywordKey, null);
         $searchKeywords = !empty($searchKeywords) ? json_decode(base64_decode($searchKeywords), true) : [];
+        logs()->info('search keywords', $searchKeywords);
         return $searchKeywords;
     }
 
@@ -256,7 +293,7 @@ class ListQueryBuilder
         if (empty($searchKeywords)) {
             return true;
         }
-        return collect($this->searchRules)->count() === collect($this->searchRules)->filter(function ($rule) use ($searchKeywords) {
+        return !(collect($this->searchRules)->count() === collect($this->searchRules)->filter(function ($rule) use ($searchKeywords) {
                 if (!is_array($rule['key']) && !isset($rule['value'])) {
                     return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $rule['key']);
                 }
@@ -268,16 +305,133 @@ class ListQueryBuilder
                         $readKey = is_numeric($key) ? $value : $key;
                         return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $readKey);
                     });
-            })->count();
+            })->count());
     }
+
+    /**
+     * @param array $needField
+     * @return $this
+     */
+
+    public function withFilterField(array $needField)
+    {
+        $this->needField = $needField;
+        return $this;
+    }
+
+    /**
+     * @param array $hidden
+     * @return $this
+     */
+
+    public function withHidden(array $hidden)
+    {
+        $this->hidden = $hidden;
+        return $this;
+    }
+
+    /**
+     * @param array $append
+     * @return $this
+     */
+
+    public function withAppends(array $append)
+    {
+        $this->append = $append;
+        return $this;
+    }
+
+    /**
+     * @param array $visible
+     * @return ListQueryBuilder
+     */
+
+    public function withVisible(array $visible)
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
+    /**
+     * @return array|Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
 
     public function get()
     {
+        if ($this->isEmptySearch) {
+            return [];
+        }
         return $this->query()->get();
     }
 
+    /**
+     * @return array|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+
     public function paginate()
     {
-        return $this->query->paginate();
+        if ($this->isEmptySearch) {
+            return [];
+        }
+        return $this->query->paginate($this->perPage, ['*'], 'Page', $this->page);
+    }
+
+    /**
+     * @param $list
+     * @return array
+     */
+
+    protected function convertList($list)
+    {
+        return array_map(function (Model $item) {
+            if (!empty($this->hidden)) {
+                $item->makeHidden($this->hidden);
+            }
+            if (!empty($this->append)) {
+                $item->setAppends($this->append);
+            }
+            if (!empty($this->visible)) {
+                $item->makeVisible($this->visible);
+            }
+            if (empty($this->needField)) {
+                return $item->toArray();
+            }
+            return array_combine(array_map(function ($field) {
+                return is_array($field) ? $field['key'] : $field;
+            }, $this->needField), array_map(function ($field) use ($item) {
+                if (is_string($field)) {
+                    return $item[$field] instanceof Carbon ? $item[$field]->toDateString() : $item[$field];
+                } elseif (is_array($field)) {
+                    return $item[$field['key']] instanceof Carbon ? $item[$field['key']]->format($field['format']) : $item[$field['key']];
+                } else {
+                    return null;
+                }
+            }, $this->needField));
+        }, collect($list)->all());
+    }
+
+    /**
+     * @return array
+     */
+
+    public function getList()
+    {
+        return $this->convertList($this->get());
+    }
+
+    /**
+     * @return array
+     */
+
+    public function paginateList()
+    {
+        $pageList = $this->paginate();
+        return [
+            'Data' => $this->convertList($pageList->items()),
+            'CurrentPage' => $pageList->currentPage(),
+            'Total' => $pageList->total(),
+            'PerPage' => $pageList->perPage(),
+            'LastPage' => $pageList->lastPage(),
+        ];
     }
 }
