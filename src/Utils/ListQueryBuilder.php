@@ -199,7 +199,9 @@ class ListQueryBuilder
     public function query()
     {
         $query = $this->query;
-        $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
+        if ($this->withPage === true) {
+            $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
+        }
         return $query;
     }
 
