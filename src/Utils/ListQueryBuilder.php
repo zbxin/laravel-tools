@@ -427,11 +427,11 @@ class ListQueryBuilder
     {
         $pageList = $this->paginate();
         return [
-            'Data' => $this->convertList($pageList->items()),
-            'CurrentPage' => $pageList->currentPage(),
-            'Total' => $pageList->total(),
-            'PerPage' => $pageList->perPage(),
-            'LastPage' => $pageList->lastPage(),
+            'data' => $this->convertList($pageList->items()),
+            'currentPage' => $pageList->currentPage(),
+            'total' => $pageList->total(),
+            'perPage' => $pageList->perPage(),
+            'lastPage' => $pageList->lastPage(),
         ];
     }
 }
