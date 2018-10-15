@@ -16,7 +16,7 @@ class Trigger
     public static function eventResult($event)
     {
         $eventResult = event($event);
-        if (Event::getListeners(get_class($event)) !== count($eventResult)) {
+        if (count(Event::getListeners(get_class($event))) !== count($eventResult)) {
             return false;
         }
         $results = array_filter($eventResult, function ($result) {
