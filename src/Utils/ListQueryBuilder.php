@@ -427,7 +427,15 @@ class ListQueryBuilder
 
     public function paginateList()
     {
-        $pageList = $this->paginate();
+        if (empty($pageList = $this->paginate())) {
+            return [
+                'data' => [],
+                'currentPage' => 1,
+                'total' => 0,
+                'perPage' => $this->perPage,
+                'lastPage' => 1,
+            ];
+        }
         return [
             'data' => $this->convertList($pageList->items()),
             'currentPage' => $pageList->currentPage(),
