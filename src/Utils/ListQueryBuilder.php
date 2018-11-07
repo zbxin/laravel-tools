@@ -262,7 +262,7 @@ class ListQueryBuilder
      * @return $this
      */
 
-    public function withSearch(array $searchRules, $allowEmpty = false, Closure $customQuery = null)
+    public function withSearch(array $searchRules, $allowEmpty = true, Closure $customQuery = null)
     {
         if ($this->checkSearchKeywordsIsAllEmpty() && $allowEmpty === false) {
             $this->isEmptySearch = true;
