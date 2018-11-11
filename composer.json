@@ -19,7 +19,9 @@
     "zhieq/laravel-case-json-middleware": "^1.0",
     "zhieq/laravel-encrypt-middleware": "^1.0",
     "zhieq/laravel-api-token-auth": "^1.0",
-    "zhieq/laravel-supports": "^1.0"
+    "zhieq/laravel-supports": "^1.0",
+    "zhieq/laravel-sms": "^1.0",
+    "zhieq/laravel-verification-code": "^1.0"
   },
   "autoload": {
     "psr-4": {
