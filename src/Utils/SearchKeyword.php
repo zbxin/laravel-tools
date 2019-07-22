@@ -2,6 +2,7 @@
 
 namespace ZhiEq\Utils;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
@@ -411,6 +412,7 @@ class SearchKeyword
      * @param $rule
      * @param Builder $subQuery
      * @return $this|Builder
+     * @throws \Exception
      */
 
     protected static function getQueryByDateBetweenRule($searchKeywords, $rule, Builder $subQuery)
@@ -421,7 +423,8 @@ class SearchKeyword
         }
         logs()->info('date between rule apply');
         list($queryKey, $beginValue, $endValue) = $betweenValue;
-        return $subQuery->where($queryKey, '>=', $beginValue)->where($queryKey, '<=', $endValue);
+        return $subQuery->where($queryKey, '>=', (new Carbon($beginValue))->setTime(0,0))
+            ->where($queryKey, '<=', (new Carbon($endValue))->setTime(23,59,59));
     }
 
 }
