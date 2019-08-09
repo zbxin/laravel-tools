@@ -12,7 +12,6 @@ use InvalidArgumentException;
  * Class SearchKeyword
  * @package ZhiEq\Utils
  */
-
 class SearchKeyword
 {
     const SEARCH_KEYWORD_TYPE_LIKE = 'like';//模糊搜索
@@ -366,7 +365,7 @@ class SearchKeyword
         logs()->info('between rule keys info', $keys);
         if (isset($rule['value'])) {
             $value = $rule['value'] instanceof Closure ? $rule['value']($searchKeywords, $rule) : $rule['value'];
-            if ($value === null || !is_array($value)) {
+            if ($value === null || !is_array($value) || count($value) !== 2) {
                 return null;
             }
             list($beginValue, $endValue) = $value;
@@ -432,8 +431,8 @@ class SearchKeyword
         }
         logs()->info('date between rule apply');
         list($queryKey, $beginValue, $endValue) = $betweenValue;
-        return $subQuery->where($queryKey, '>=', (new Carbon($beginValue))->setTime(0,0))
-            ->where($queryKey, '<=', (new Carbon($endValue))->setTime(23,59,59));
+        return $subQuery->where($queryKey, '>=', (new Carbon($beginValue))->setTime(0, 0))
+            ->where($queryKey, '<=', (new Carbon($endValue))->setTime(23, 59, 59));
     }
 
 }
