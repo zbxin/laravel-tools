@@ -364,6 +364,15 @@ class SearchKeyword
     {
         $keys = self::convertRuleKeyToKey($rule);//找出搜索关键词
         logs()->info('between rule keys info', $keys);
+        if (isset($rule['value'])) {
+            $value = $rule['value'] instanceof Closure ? $rule['value']($searchKeywords, $rule) : $rule['value'];
+            if ($value === null || !is_array($value)) {
+                return null;
+            }
+            list($beginValue, $endValue) = $value;
+            list($readKey, $queryKey) = self::checkValue($searchKeywords, is_numeric(array_keys($keys)[0]) ? array_values($keys) : $keys);
+            return [self::convertQueryKey($queryKey, $rule), $beginValue, $endValue];
+        }
         $filterKeys = collect($keys)->filter(function ($value, $key) use ($searchKeywords) {
             list($beginValue, $endValue) = self::checkBetweenValue($searchKeywords, is_numeric($key) ? $value : $key);
             return !empty($beginValue) && !empty($endValue);
