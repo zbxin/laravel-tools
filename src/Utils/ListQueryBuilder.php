@@ -3,7 +3,9 @@
 namespace ZhiEq\Utils;
 
 use Closure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -355,7 +357,7 @@ class ListQueryBuilder
     }
 
     /**
-     * @return array|Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @return array|Builder[]|Collection
      */
 
     public function get()
@@ -367,7 +369,7 @@ class ListQueryBuilder
     }
 
     /**
-     * @return array|\Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return array|LengthAwarePaginator
      */
 
     public function paginate()
