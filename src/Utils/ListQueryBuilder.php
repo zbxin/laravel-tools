@@ -13,437 +13,466 @@ use Psr\Log\InvalidArgumentException;
 
 class ListQueryBuilder
 {
-    const ORDER_TYPE_ASC = 'asc';
-    const ORDER_TYPE_DESC = 'desc';
+  const ORDER_TYPE_ASC = 'asc';
+  const ORDER_TYPE_DESC = 'desc';
 
-    /**
-     * @var Builder
-     */
+  /**
+   * @var Builder
+   */
 
-    private $query;
+  private $query;
 
-    /**
-     * @var Request
-     */
+  /**
+   * @var Request
+   */
 
-    private $request;
+  private $request;
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $pageKey = 'X-Page';
+  private $pageKey = 'X-Page';
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $perPageKey = 'X-Per-Page';
+  private $perPageKey = 'X-Per-Page';
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $orderFieldKey = 'X-Order-Field';
+  private $orderFieldKey = 'X-Order-Field';
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $orderTypeKey = 'X-Order-Type';
+  private $orderTypeKey = 'X-Order-Type';
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $searchKeywordKey = 'X-Search-Keywords';
+  private $searchKeywordKey = 'X-Search-Keywords';
 
-    /**
-     * @var integer
-     */
+  /**
+   * @var integer
+   */
 
-    private $perPage;
+  private $perPage;
 
-    /**
-     * @var integer
-     */
+  /**
+   * @var integer
+   */
 
-    private $page;
+  private $page;
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $orderField;
+  private $orderField;
 
-    /**
-     * @var string
-     */
+  /**
+   * @var string
+   */
 
-    private $orderType;
+  private $orderType;
 
-    /**
-     * @var bool
-     */
+  /**
+   * @var bool
+   */
 
-    private $withPage = false;
+  private $withPage = false;
 
-    /**
-     * @var array
-     */
+  /**
+   * @var array
+   */
 
-    private $searchRules = [];
+  private $searchRules = [];
 
-    /**
-     * @var bool
-     */
+  /**
+   * @var bool
+   */
 
-    private $isEmptySearch = false;
+  private $isEmptySearch = false;
 
-    /**
-     * @var array
-     */
+  /**
+   * @var array
+   */
 
-    private $hidden = [];
+  private $hidden = [];
 
-    /**
-     * @var array
-     */
+  /**
+   * @var array
+   */
 
-    private $append = [];
+  private $append = [];
 
-    /**
-     * @var array
-     */
+  /**
+   * @var array
+   */
 
-    private $visible = [];
+  private $visible = [];
 
-    /**
-     * @var array
-     */
+  /**
+   * @var array
+   */
 
-    private $needField = [];
+  private $needField = [];
+
+  /**
+   * @var array
+   */
+
+  private $searchKeywords = [];
 
 
-    /**
-     * ListQueryBuilder constructor.
-     * @param Builder $query
-     * @param array $configs
-     */
+  /**
+   * ListQueryBuilder constructor.
+   * @param Builder $query
+   * @param array $configs
+   */
 
 
-    public function __construct(Builder $query, $configs = [])
-    {
-        $this->setQuery($query);
-        $this->setRequest(\Illuminate\Support\Facades\Request::instance());
-        $this->resolveConfigs($configs);
+  public function __construct(Builder $query, $configs = [])
+  {
+    $this->setQuery($query);
+    $this->setRequest(\Illuminate\Support\Facades\Request::instance());
+    $this->resolveConfigs($configs);
+  }
+
+  /**
+   * @param Builder $query
+   * @param array $configs
+   * @return ListQueryBuilder
+   */
+
+  public static function create(Builder $query, $configs = [])
+  {
+    return new self($query, $configs);
+  }
+
+  /**
+   * @param $configs
+   */
+
+  protected function resolveConfigs(array $configs)
+  {
+    collect([
+      'pageKey', 'perPageKey', 'orderFieldKey', 'orderTypeKey', 'searchKeywordKey'
+    ])->each(function ($key) use ($configs) {
+      $this->$key = isset($configs[$key]) ? $configs[$key] : $this->$key;
+    });
+  }
+
+  /**
+   * @param Request $request
+   * @return $this
+   */
+
+  public function setRequest(Request $request)
+  {
+    $this->request = $request;
+    return $this;
+  }
+
+  /**
+   * @return Request
+   */
+
+  public function getRequest()
+  {
+    return $this->request;
+  }
+
+  /**
+   * @param Builder $query
+   * @return $this
+   */
+
+  public function setQuery(Builder $query)
+  {
+    $this->query = $query;
+    return $this;
+  }
+
+  /**
+   * @return Builder
+   */
+
+  public function query()
+  {
+    $query = $this->query;
+    if ($this->withPage === true) {
+      $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
     }
+    return $query;
+  }
 
-    /**
-     * @param Builder $query
-     * @param array $configs
-     * @return ListQueryBuilder
-     */
+  /**
+   * @param array $searchKeywords
+   * @return $this
+   */
 
-    public static function create(Builder $query, $configs = [])
-    {
-        return new self($query, $configs);
+  public function setSearchKeywords(array $searchKeywords)
+  {
+    $this->searchKeywords = $searchKeywords;
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+
+  public function getSearchKeywords()
+  {
+    if (empty($this->searchKeywords)) {
+      $this->searchKeywords = $this->getSearchKeywordsFromRequest();
     }
+    return $this->searchKeywords;
+  }
 
-    /**
-     * @param $configs
-     */
+  /**
+   * @param int $defaultPerPage
+   * @param int $defaultPage
+   * @return $this
+   */
 
-    protected function resolveConfigs(array $configs)
-    {
-        collect([
-            'pageKey', 'perPageKey', 'orderFieldKey', 'orderTypeKey', 'searchKeywordKey'
-        ])->each(function ($key) use ($configs) {
-            $this->$key = isset($configs[$key]) ? $configs[$key] : $this->$key;
-        });
+  public function withPage($defaultPerPage = 10, $defaultPage = 1)
+  {
+    $this->perPage = $this->request->header($this->perPageKey, $defaultPerPage);
+    $this->page = $this->request->header($this->pageKey, $defaultPage);
+    $this->withPage = true;
+    return $this;
+  }
+
+  /**
+   * @param string $defaultOrderField
+   * @param string $defaultOrderType
+   * @param array $allowOrderFiled
+   * @return $this
+   */
+
+  public function withOrder($defaultOrderField, $defaultOrderType = self::ORDER_TYPE_DESC, array $allowOrderFiled = [])
+  {
+    if (!in_array($defaultOrderType, [self::ORDER_TYPE_ASC, self::ORDER_TYPE_DESC])) {
+      throw new InvalidArgumentException('default order type is valid.');
     }
+    $orderField = $this->request->header($this->orderFieldKey, $defaultOrderField);
+    $this->orderField = !empty($allowOrderFiled) ? $this->checkOrderFieldIsAllow($allowOrderFiled, $orderField) : $orderField;
+    $this->orderType = $this->request->header($this->orderTypeKey, $defaultOrderType);
+    $this->query->orderBy($this->orderField, $this->orderType);
+    return $this;
+  }
 
-    /**
-     * @param Request $request
-     * @return $this
-     */
+  /**
+   * @param $allowOrderFiled
+   * @param $orderField
+   * @return null
+   */
 
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-        return $this;
+  protected function checkOrderFieldIsAllow($allowOrderFiled, $orderField)
+  {
+    foreach ($allowOrderFiled as $key => $value) {
+      $diffFiled = is_numeric($key) ? $value : $key;
+      if ($orderField === $diffFiled) {
+        return $value;
+      }
     }
+    return null;
+  }
 
-    /**
-     * @return Request
-     */
+  /**
+   * @param array $searchRules
+   * @param bool $allowEmpty
+   * @param Closure|null $customQuery
+   * @return $this
+   */
 
-    public function getRequest()
-    {
-        return $this->request;
+  public function withSearch(array $searchRules, $allowEmpty = true, Closure $customQuery = null)
+  {
+    if ($this->checkSearchKeywordsIsAllEmpty() && $allowEmpty === false) {
+      $this->isEmptySearch = true;
+      return $this;
     }
+    $this->query = SearchKeyword::query($this->getSearchKeywords(), $this->query, $searchRules, $customQuery);
+    logs()->info('search sql:' . $this->query->toSql());
+    return $this;
+  }
 
-    /**
-     * @param Builder $query
-     * @return $this
-     */
+  /**
+   * @return array|mixed|string
+   */
 
-    public function setQuery(Builder $query)
-    {
-        $this->query = $query;
-        return $this;
+  protected function getSearchKeywordsFromRequest()
+  {
+    $searchKeywords = $this->request->header($this->searchKeywordKey, null);
+    $searchKeywords = !empty($searchKeywords) ? json_decode(base64_decode($searchKeywords), true) : [];
+    logs()->info('search keywords', $searchKeywords);
+    return $searchKeywords;
+  }
+
+  /**
+   * @return bool
+   */
+
+  protected function checkSearchKeywordsIsAllEmpty()
+  {
+    $searchKeywords = $this->getSearchKeywords();
+    if (empty($searchKeywords)) {
+      return true;
     }
-
-    /**
-     * @return Builder
-     */
-
-    public function query()
-    {
-        $query = $this->query;
-        if ($this->withPage === true) {
-            $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
+    return !(collect($this->searchRules)->count() === collect($this->searchRules)->filter(function ($rule) use ($searchKeywords) {
+        if (!is_array($rule['key']) && !isset($rule['value'])) {
+          return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $rule['key']);
         }
-        return $query;
-    }
-
-    /**
-     * @param int $defaultPerPage
-     * @param int $defaultPage
-     * @return $this
-     */
-
-    public function withPage($defaultPerPage = 10, $defaultPage = 1)
-    {
-        $this->perPage = $this->request->header($this->perPageKey, $defaultPerPage);
-        $this->page = $this->request->header($this->pageKey, $defaultPage);
-        $this->withPage = true;
-        return $this;
-    }
-
-    /**
-     * @param string $defaultOrderField
-     * @param string $defaultOrderType
-     * @param array $allowOrderFiled
-     * @return $this
-     */
-
-    public function withOrder($defaultOrderField, $defaultOrderType = self::ORDER_TYPE_DESC, array $allowOrderFiled = [])
-    {
-        if (!in_array($defaultOrderType, [self::ORDER_TYPE_ASC, self::ORDER_TYPE_DESC])) {
-            throw new InvalidArgumentException('default order type is valid.');
+        if (!is_array($rule['key']) && isset($rule['value'])) {
+          $value = $rule['value'] instanceof Closure ? $rule['value']($searchKeywords) : $rule['value'];
+          return $value !== null;
         }
-        $orderField = $this->request->header($this->orderFieldKey, $defaultOrderField);
-        $this->orderField = !empty($allowOrderFiled) ? $this->checkOrderFieldIsAllow($allowOrderFiled, $orderField) : $orderField;
-        $this->orderType = $this->request->header($this->orderTypeKey, $defaultOrderType);
-        $this->query->orderBy($this->orderField, $this->orderType);
-        return $this;
+        return collect($rule['key'])->count() === collect($rule['key'])->filter(function ($value, $key) use ($searchKeywords) {
+            $readKey = is_numeric($key) ? $value : $key;
+            return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $readKey);
+          });
+      })->count());
+  }
+
+  /**
+   * @param array $needField
+   * @return $this
+   */
+
+  public function withFilterField(array $needField)
+  {
+    $this->needField = $needField;
+    return $this;
+  }
+
+  /**
+   * @param array $hidden
+   * @return $this
+   */
+
+  public function withHidden(array $hidden)
+  {
+    $this->hidden = $hidden;
+    return $this;
+  }
+
+  /**
+   * @param array $append
+   * @return $this
+   */
+
+  public function withAppends(array $append)
+  {
+    $this->append = $append;
+    return $this;
+  }
+
+  /**
+   * @param array $visible
+   * @return ListQueryBuilder
+   */
+
+  public function withVisible(array $visible)
+  {
+    $this->visible = $visible;
+    return $this;
+  }
+
+  /**
+   * @return array|Builder[]|Collection
+   */
+
+  public function get()
+  {
+    if ($this->isEmptySearch) {
+      return [];
     }
+    return $this->query()->get();
+  }
 
-    /**
-     * @param $allowOrderFiled
-     * @param $orderField
-     * @return null
-     */
+  /**
+   * @return array|LengthAwarePaginator
+   */
 
-    protected function checkOrderFieldIsAllow($allowOrderFiled, $orderField)
-    {
-        foreach ($allowOrderFiled as $key => $value) {
-            $diffFiled = is_numeric($key) ? $value : $key;
-            if ($orderField === $diffFiled) {
-                return $value;
-            }
+  public function paginate()
+  {
+    if ($this->isEmptySearch) {
+      return [];
+    }
+    return $this->query->paginate($this->perPage, ['*'], 'Page', $this->page);
+  }
+
+  /**
+   * @param $list
+   * @return array
+   */
+
+  protected function convertList($list)
+  {
+    return array_map(function (Model $item) {
+      if (!empty($this->hidden)) {
+        $item->makeHidden($this->hidden);
+      }
+      if (!empty($this->append)) {
+        $item->setAppends($this->append);
+      }
+      if (!empty($this->visible)) {
+        $item->makeVisible($this->visible);
+      }
+      if (empty($this->needField)) {
+        return $item->toArray();
+      }
+      return array_combine(array_map(function ($field) {
+        return is_array($field) ? $field['key'] : $field;
+      }, $this->needField), array_map(function ($field) use ($item) {
+        if (is_string($field)) {
+          return $item[$field] instanceof Carbon ? $item[$field]->toDateString() : $item[$field];
+        } elseif (is_array($field)) {
+          return $item[$field['key']] instanceof Carbon ? $item[$field['key']]->format($field['format']) : $item[$field['key']];
+        } else {
+          return null;
         }
-        return null;
+      }, $this->needField));
+    }, collect($list)->all());
+  }
+
+  /**
+   * @return array
+   */
+
+  public function getList()
+  {
+    return $this->convertList($this->get());
+  }
+
+  /**
+   * @return array
+   */
+
+  public function paginateList()
+  {
+    if (empty($pageList = $this->paginate())) {
+      return [
+        'data' => [],
+        'currentPage' => 1,
+        'total' => 0,
+        'perPage' => $this->perPage,
+        'lastPage' => 1,
+      ];
     }
-
-    /**
-     * @param array $searchRules
-     * @param bool $allowEmpty
-     * @param Closure|null $customQuery
-     * @return $this
-     */
-
-    public function withSearch(array $searchRules, $allowEmpty = true, Closure $customQuery = null)
-    {
-        if ($this->checkSearchKeywordsIsAllEmpty() && $allowEmpty === false) {
-            $this->isEmptySearch = true;
-            return $this;
-        }
-        $this->query = SearchKeyword::query($this->getSearchKeywordsFromRequest(), $this->query, $searchRules, $customQuery);
-        logs()->info('search sql:' . $this->query->toSql());
-        return $this;
-    }
-
-    /**
-     * @return array|mixed|string
-     */
-
-    protected function getSearchKeywordsFromRequest()
-    {
-        $searchKeywords = $this->request->header($this->searchKeywordKey, null);
-        $searchKeywords = !empty($searchKeywords) ? json_decode(base64_decode($searchKeywords), true) : [];
-        logs()->info('search keywords', $searchKeywords);
-        return $searchKeywords;
-    }
-
-    /**
-     * @return bool
-     */
-
-    protected function checkSearchKeywordsIsAllEmpty()
-    {
-        $searchKeywords = $this->getSearchKeywordsFromRequest();
-        if (empty($searchKeywords)) {
-            return true;
-        }
-        return !(collect($this->searchRules)->count() === collect($this->searchRules)->filter(function ($rule) use ($searchKeywords) {
-                if (!is_array($rule['key']) && !isset($rule['value'])) {
-                    return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $rule['key']);
-                }
-                if (!is_array($rule['key']) && isset($rule['value'])) {
-                    $value = $rule['value'] instanceof Closure ? $rule['value']($searchKeywords) : $rule['value'];
-                    return $value !== null;
-                }
-                return collect($rule['key'])->count() === collect($rule['key'])->filter(function ($value, $key) use ($searchKeywords) {
-                        $readKey = is_numeric($key) ? $value : $key;
-                        return SearchKeyword::checkValueIssetAndEmpty($searchKeywords, $readKey);
-                    });
-            })->count());
-    }
-
-    /**
-     * @param array $needField
-     * @return $this
-     */
-
-    public function withFilterField(array $needField)
-    {
-        $this->needField = $needField;
-        return $this;
-    }
-
-    /**
-     * @param array $hidden
-     * @return $this
-     */
-
-    public function withHidden(array $hidden)
-    {
-        $this->hidden = $hidden;
-        return $this;
-    }
-
-    /**
-     * @param array $append
-     * @return $this
-     */
-
-    public function withAppends(array $append)
-    {
-        $this->append = $append;
-        return $this;
-    }
-
-    /**
-     * @param array $visible
-     * @return ListQueryBuilder
-     */
-
-    public function withVisible(array $visible)
-    {
-        $this->visible = $visible;
-        return $this;
-    }
-
-    /**
-     * @return array|Builder[]|Collection
-     */
-
-    public function get()
-    {
-        if ($this->isEmptySearch) {
-            return [];
-        }
-        return $this->query()->get();
-    }
-
-    /**
-     * @return array|LengthAwarePaginator
-     */
-
-    public function paginate()
-    {
-        if ($this->isEmptySearch) {
-            return [];
-        }
-        return $this->query->paginate($this->perPage, ['*'], 'Page', $this->page);
-    }
-
-    /**
-     * @param $list
-     * @return array
-     */
-
-    protected function convertList($list)
-    {
-        return array_map(function (Model $item) {
-            if (!empty($this->hidden)) {
-                $item->makeHidden($this->hidden);
-            }
-            if (!empty($this->append)) {
-                $item->setAppends($this->append);
-            }
-            if (!empty($this->visible)) {
-                $item->makeVisible($this->visible);
-            }
-            if (empty($this->needField)) {
-                return $item->toArray();
-            }
-            return array_combine(array_map(function ($field) {
-                return is_array($field) ? $field['key'] : $field;
-            }, $this->needField), array_map(function ($field) use ($item) {
-                if (is_string($field)) {
-                    return $item[$field] instanceof Carbon ? $item[$field]->toDateString() : $item[$field];
-                } elseif (is_array($field)) {
-                    return $item[$field['key']] instanceof Carbon ? $item[$field['key']]->format($field['format']) : $item[$field['key']];
-                } else {
-                    return null;
-                }
-            }, $this->needField));
-        }, collect($list)->all());
-    }
-
-    /**
-     * @return array
-     */
-
-    public function getList()
-    {
-        return $this->convertList($this->get());
-    }
-
-    /**
-     * @return array
-     */
-
-    public function paginateList()
-    {
-        if (empty($pageList = $this->paginate())) {
-            return [
-                'data' => [],
-                'currentPage' => 1,
-                'total' => 0,
-                'perPage' => $this->perPage,
-                'lastPage' => 1,
-            ];
-        }
-        return [
-            'data' => $this->convertList($pageList->items()),
-            'currentPage' => $pageList->currentPage(),
-            'total' => $pageList->total(),
-            'perPage' => $pageList->perPage(),
-            'lastPage' => $pageList->lastPage(),
-        ];
-    }
+    return [
+      'data' => $this->convertList($pageList->items()),
+      'currentPage' => $pageList->currentPage(),
+      'total' => $pageList->total(),
+      'perPage' => $pageList->perPage(),
+      'lastPage' => $pageList->lastPage(),
+    ];
+  }
 }
