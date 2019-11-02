@@ -530,6 +530,6 @@ class ListQueryBuilder
     if ($this->isCountBaseQuery) {
       $returnList['baseTotal'] = $this->countBaseQuery();
     }
-    return $pageList;
+    return $returnList;
   }
 }
