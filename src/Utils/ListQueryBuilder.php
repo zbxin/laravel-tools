@@ -20,6 +20,12 @@ class ListQueryBuilder
    * @var Builder
    */
 
+  private $baseQuery;
+
+  /**
+   * @var Builder
+   */
+
   private $query;
 
   /**
@@ -101,6 +107,12 @@ class ListQueryBuilder
   private $isEmptySearch = false;
 
   /**
+   * @var bool
+   */
+
+  private $isCountBaseQuery = false;
+
+  /**
    * @var array
    */
 
@@ -140,6 +152,7 @@ class ListQueryBuilder
 
   public function __construct(Builder $query, $configs = [])
   {
+    $this->setBaseQuery($query);
     $this->setQuery($query);
     $this->setRequest(\Illuminate\Support\Facades\Request::instance());
     $this->resolveConfigs($configs);
@@ -211,6 +224,35 @@ class ListQueryBuilder
       $query->limit($this->perPage)->offset(($this->page - 1) * $this->perPage);
     }
     return $query;
+  }
+
+  /**
+   * @return Builder
+   */
+
+  public function getQuery()
+  {
+    return $this->query;
+  }
+
+  /**
+   * @param Builder $query
+   * @return $this
+   */
+
+  public function setBaseQuery(Builder $query)
+  {
+    $this->baseQuery = $query;
+    return $this;
+  }
+
+  /**
+   * @return Builder
+   */
+
+  public function getBaseQuery()
+  {
+    return $this->baseQuery;
   }
 
   /**
@@ -386,6 +428,16 @@ class ListQueryBuilder
   }
 
   /**
+   * @return $this
+   */
+
+  public function withCountBaseQuery()
+  {
+    $this->isCountBaseQuery = true;
+    return $this;
+  }
+
+  /**
    * @return array|Builder[]|Collection
    */
 
@@ -444,6 +496,15 @@ class ListQueryBuilder
   }
 
   /**
+   * @return int
+   */
+
+  public function countBaseQuery()
+  {
+    return $this->baseQuery->count();
+  }
+
+  /**
    * @return array
    */
 
@@ -458,21 +519,17 @@ class ListQueryBuilder
 
   public function paginateList()
   {
-    if (empty($pageList = $this->paginate())) {
-      return [
-        'data' => [],
-        'currentPage' => 1,
-        'total' => 0,
-        'perPage' => $this->perPage,
-        'lastPage' => 1,
-      ];
-    }
-    return [
-      'data' => $this->convertList($pageList->items()),
-      'currentPage' => $pageList->currentPage(),
-      'total' => $pageList->total(),
-      'perPage' => $pageList->perPage(),
-      'lastPage' => $pageList->lastPage(),
+    $pageList = $this->paginate();
+    $returnList = [
+      'data' => empty($pageList) ? [] : $this->convertList($pageList->items()),
+      'currentPage' => empty($pageList) ? 1 : $pageList->currentPage(),
+      'total' => empty($pageList) ? 0 : $pageList->total(),
+      'perPage' => empty($pageList) ? $this->perPage : $pageList->perPage(),
+      'lastPage' => empty($pageList) ? 1 : $pageList->lastPage()
     ];
+    if ($this->isCountBaseQuery) {
+      $returnList['baseTotal'] = $this->countBaseQuery();
+    }
+    return $pageList;
   }
 }
