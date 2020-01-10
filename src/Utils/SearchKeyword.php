@@ -478,7 +478,7 @@ class SearchKeyword
       return $subQuery;
     }
     list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
-    return $subQuery->whereIn($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
+    return empty($convertValue) ? $subQuery : $subQuery->whereIn($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
       $subQueryFunction($query, $convertValue, $searchKeywords, $rule);
     });
   }
@@ -500,7 +500,7 @@ class SearchKeyword
       return $subQuery;
     }
     list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
-    return $subQuery->where($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
+    return empty($convertValue) ? $subQuery : $subQuery->where($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
       $subQueryFunction($query, $convertValue, $searchKeywords, $rule);
     });
   }
