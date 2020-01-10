@@ -21,6 +21,11 @@ class SearchKeyword
   const SEARCH_KEYWORD_TYPE_DATE_BETWEEN = 'date_between';//时间间隔
   const SEARCH_KEYWORD_TYPE_MORE = 'more';//大于
   const SEARCH_KEYWORD_TYPE_LESS = 'less';//小于
+  const SEARCH_KEYWORD_TYPE_IS_NULL = 'is_null';//是否为null
+  const SEARCH_KEYWORD_TYPE_IS_NOT_NULL = 'is_not_null';//是否不为null
+  const SEARCH_KEYWORD_TYPE_IS_OR_NOT_NULL = 'is_or_not_null';//是否不为null
+  const SEARCH_KEYWORD_TYPE_SUB_IN = 'sub_in';//子查询in
+  const SEARCH_KEYWORD_TYPE_SUB = 'sub';//子查询
 
   /**
    * @param $searchKeywords
@@ -74,34 +79,47 @@ class SearchKeyword
     if (self::isSpecialType($ruleType)) {
       return self::$method($searchKeywords, $rule, $subQuery);
     }
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    //
+    logs()->info('convert-and-filter-value-result', ['queryKey' => $queryKey, 'value' => $convertValue]);
+    return $convertValue === null ? $subQuery : self::$method($queryKey, $convertValue, $subQuery);
+  }
+
+  /**
+   * @param $rule
+   * @param $searchKeywords
+   * @return array
+   */
+
+  protected static function convertAndFilterValue($rule, $searchKeywords)
+  {
     //
     if (isset($rule['value']) && is_array($rule['key'])) {
-      return $subQuery;
+      return [null, null];
     }
     //
     if (isset($rule['value']) && isset($rule['key'])) {
       logs()->info('fixed value rule', ['rule' => $rule]);
       $value = $rule['value'] instanceof Closure ? $rule['value']($searchKeywords, $rule) : $rule['value'];
       logs()->info('fixed value result', ['value' => $value]);
-      return $value === null ? $subQuery : self::$method(self::convertQueryKey($rule['key'], $rule), $value, $subQuery);
+      return $value === null ? [null, null] : [$rule['key'], $value];
     }
     //
     list($readKey, $queryKey) = self::checkValue($searchKeywords, self::convertRuleKeyToKey($rule));
     logs()->info('key info', ['readKey' => $readKey, 'queryKey' => $queryKey]);
     if ($readKey === null || $queryKey === null) {
-      return $subQuery;
+      return [null, null];
     }
     //
     logs()->info('begin filter value');
     $value = self::filterValue($searchKeywords, $readKey, $rule);
     if ($value === null) {
-      return $subQuery;
+      return [null, null];
     }
     //
     $value = self::convertValue($searchKeywords, $rule, $readKey, $value);
     logs()->info('value', ['value' => $value]);
-    //
-    return empty($value) && $value !== 0 ? $subQuery : self::$method(self::convertQueryKey($queryKey, $rule), $value, $subQuery);
+    return empty($value) && $value !== 0 ? [null, null] : [self::convertQueryKey($queryKey, $rule), $value];
   }
 
   /**
@@ -122,7 +140,13 @@ class SearchKeyword
 
   protected static function isSpecialType($type)
   {
-    $specialType = [self::SEARCH_KEYWORD_TYPE_BETWEEN, self::SEARCH_KEYWORD_TYPE_DATE_BETWEEN];
+    $specialType = [
+      self::SEARCH_KEYWORD_TYPE_BETWEEN,
+      self::SEARCH_KEYWORD_TYPE_DATE_BETWEEN,
+      self::SEARCH_KEYWORD_TYPE_SUB_IN,
+      self::SEARCH_KEYWORD_TYPE_SUB,
+      self::SEARCH_KEYWORD_TYPE_IS_NULL,
+    ];
     return in_array($type, $specialType);
   }
 
@@ -435,6 +459,116 @@ class SearchKeyword
     $beginValue = (new Carbon($beginValue))->setTime(0, 0)->format($format);
     $endValue = (new Carbon($endValue))->setTime(23, 59, 59)->format($format);
     return $subQuery->where($queryKey, '>=', $beginValue)->where($queryKey, '<=', $endValue);
+  }
+
+  /**
+   * in子查询
+   *
+   * @param $searchKeywords
+   * @param $rule
+   * @param Builder $subQuery
+   * @return Builder
+   */
+
+  protected static function getQueryBySubInRule($searchKeywords, $rule, Builder $subQuery)
+  {
+    $subQueryFunction = isset($rule['sub']) ? $rule['sub'] : null;
+    logs()->info('sub-in-rule-sub-function', ['function' => $subQueryFunction]);
+    if (empty($subQueryFunction)) {
+      return $subQuery;
+    }
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    return $subQuery->whereIn($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
+      $subQueryFunction($query, $convertValue, $searchKeywords, $rule);
+    });
+  }
+
+  /**
+   * 子查询
+   *
+   * @param $searchKeywords
+   * @param $rule
+   * @param Builder $subQuery
+   * @return Builder
+   */
+
+  protected static function getQueryBySubRule($searchKeywords, $rule, Builder $subQuery)
+  {
+    $subQueryFunction = isset($rule['sub']) ? $rule['sub'] : null;
+    logs()->info('sub-rule-sub-function', ['function' => $subQueryFunction]);
+    if (empty($subQueryFunction)) {
+      return $subQuery;
+    }
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    return $subQuery->where($queryKey, function ($query) use ($subQueryFunction, $convertValue, $searchKeywords, $rule) {
+      $subQueryFunction($query, $convertValue, $searchKeywords, $rule);
+    });
+  }
+
+  /**
+   * @param $value
+   * @param $trueValue
+   * @return bool
+   */
+
+  protected static function checkValueIsTrue($value, $trueValue)
+  {
+    $isNull = false;
+    if (is_array($trueValue)) {
+      $isNull = in_array($value, $trueValue);
+    }
+    if ($trueValue !== null) {
+      $isNull = $value === $trueValue;
+    }
+    return $isNull;
+  }
+
+  /**
+   * 是否为空
+   *
+   * @param $searchKeywords
+   * @param $rule
+   * @param Builder $subQuery
+   * @return Builder
+   */
+
+  protected static function getQueryByIsNullRule($searchKeywords, $rule, Builder $subQuery)
+  {
+    $trueValue = isset($rule['trueValue']) ? $rule['trueValue'] : null;
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    return self::checkValueIsTrue($convertValue, $trueValue) === true ? $subQuery->whereNull($queryKey) : $subQuery;
+  }
+
+  /**
+   * 是否不为空
+   *
+   * @param $searchKeywords
+   * @param $rule
+   * @param Builder $subQuery
+   * @return Builder
+   */
+
+  protected static function getQueryByIsNotNullRule($searchKeywords, $rule, Builder $subQuery)
+  {
+    $trueValue = isset($rule['trueValue']) ? $rule['trueValue'] : null;
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    return self::checkValueIsTrue($convertValue, $trueValue) === true ? $subQuery->whereNotNull($queryKey) : $subQuery;
+  }
+
+  /**
+   * 是或否为空
+   *
+   * @param $searchKeywords
+   * @param $rule
+   * @param Builder $subQuery
+   * @return Builder
+   */
+
+  protected static function getQueryByIsOrNotNullRule($searchKeywords, $rule, Builder $subQuery)
+  {
+    $trueValue = isset($rule['trueValue']) ? $rule['trueValue'] : null;
+    list($queryKey, $convertValue) = self::convertAndFilterValue($rule, $searchKeywords);
+    return self::checkValueIsTrue($convertValue, $trueValue) === true ? $subQuery->whereNull($queryKey) : $subQuery->whereNotNull($queryKey);
   }
 
 }
