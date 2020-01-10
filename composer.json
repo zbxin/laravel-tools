@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "laravel/framework": "5.*",
+    "laravel/framework": "*",
     "ext-json": "*",
     "zhieq/laravel-region": "^1.0",
     "zhieq/laravel-gee-test": "^1.0",
