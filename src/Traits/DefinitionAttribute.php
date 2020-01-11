@@ -2,6 +2,8 @@
 
 namespace ZhiEq\Traits;
 
+use Illuminate\Support\Str;
+
 /**
  * Trait DefinitionAttribute
  * @package ZhiEq\Traits
@@ -79,9 +81,9 @@ trait DefinitionAttribute
 
     protected static function isDefinitionMethod($method)
     {
-        return (starts_with($method, 'get') && ends_with($method, 'Label')) ||
-            (starts_with($method, 'get') && ends_with($method, 'List')) ||
-            (starts_with($method, 'get') && ends_with($method, 'Labels'));
+        return (Str::startsWith($method, 'get') && Str::endsWith($method, 'Label')) ||
+            (Str::startsWith($method, 'get') && Str::endsWith($method, 'List')) ||
+            (Str::startsWith($method, 'get') && Str::endsWith($method, 'Labels'));
     }
 
     /**
@@ -92,11 +94,11 @@ trait DefinitionAttribute
 
     protected static function callDefinitionMethod($method, $parameters)
     {
-        if (starts_with($method, 'get') && ends_with($method, 'Label')) {
+        if (Str::startsWith($method, 'get') && Str::endsWith($method, 'Label')) {
             return self::getDefinitionLabel(self::getDefinitionName($method, 'Label'), $parameters[0]);
-        } else if (starts_with($method, 'get') && ends_with($method, 'List')) {
+        } else if (Str::startsWith($method, 'get') && Str::endsWith($method, 'List')) {
             return self::getDefinitionList(self::getDefinitionName($method, 'List'));
-        } else if (starts_with($method, 'get') && ends_with($method, 'Labels')) {
+        } else if (Str::startsWith($method, 'get') && Str::endsWith($method, 'Labels')) {
             return self::getDefinitionLabels(self::getDefinitionName($method, 'Labels'));
         }
     }
