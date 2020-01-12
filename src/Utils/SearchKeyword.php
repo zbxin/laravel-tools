@@ -21,6 +21,9 @@ class SearchKeyword
   const SEARCH_KEYWORD_TYPE_DATE_BETWEEN = 'date_between';//时间间隔
   const SEARCH_KEYWORD_TYPE_MORE = 'more';//大于
   const SEARCH_KEYWORD_TYPE_LESS = 'less';//小于
+  const SEARCH_KEYWORD_TYPE_MORE_OR_EQUAL = 'more_or_equal';//大于等于
+  const SEARCH_KEYWORD_TYPE_LESS_OR_EQUAL = 'less_or_equal';//小于等于
+  const SEARCH_KEYWORD_TYPE_NOT_EQUAL = 'not_equal';//不等于
   const SEARCH_KEYWORD_TYPE_IS_NULL = 'is_null';//是否为null
   const SEARCH_KEYWORD_TYPE_IS_NOT_NULL = 'is_not_null';//是否不为null
   const SEARCH_KEYWORD_TYPE_IS_OR_NOT_NULL = 'is_or_not_null';//是否不为null
@@ -375,6 +378,48 @@ class SearchKeyword
   protected static function getQueryByLessRule($queryKey, $value, $subQuery)
   {
     return $subQuery->where($queryKey, '<', $value);
+  }
+
+  /**
+   * 大于等于条件
+   *
+   * @param $queryKey
+   * @param $value
+   * @param Builder $subQuery
+   * @return $this|Builder
+   */
+
+  protected static function getQueryByMoreOrEqualRule($queryKey, $value, $subQuery)
+  {
+    return $subQuery->where($queryKey, '>=', $value);
+  }
+
+  /**
+   * 小于等于条件
+   *
+   * @param $queryKey
+   * @param $value
+   * @param Builder $subQuery
+   * @return $this|Builder
+   */
+
+  protected static function getQueryByLessOrEqualRule($queryKey, $value, $subQuery)
+  {
+    return $subQuery->where($queryKey, '<=', $value);
+  }
+
+  /**
+   * 不等于条件
+   *
+   * @param $queryKey
+   * @param $value
+   * @param Builder $subQuery
+   * @return $this|Builder
+   */
+
+  protected static function getQueryByNotEqualRule($queryKey, $value, $subQuery)
+  {
+    return $subQuery->where($queryKey, '<>', $value);
   }
 
   /**
