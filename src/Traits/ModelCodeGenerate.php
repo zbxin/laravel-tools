@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Extend;
+namespace ZhiEq\Traits;
 
 use ZhiEq\Exceptions\CustomException;
 use ZhiEq\Utils\CodeGenerator;
