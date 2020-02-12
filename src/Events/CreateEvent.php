@@ -5,50 +5,48 @@ namespace ZhiEq\Events;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-abstract class CreateEvent extends Event implements EventValidatorInterface
+abstract class CreateEvent extends ValidatorEvent
 {
-    use EventValidatorTrait;
+  /**
+   * @var Model
+   */
 
-    /**
-     * @var Model
-     */
+  public $newModel;
 
-    public $newModel;
+  /**
+   * CreateEvent constructor.
+   * @param $input
+   * @throws ValidationException
+   */
 
-    /**
-     * CreateEvent constructor.
-     * @param $input
-     * @throws ValidationException
-     */
+  public function __construct($input)
+  {
+    $this->validateInput($input);
+    $modelClass = $this->modelClass();
+    $this->newModel = new $modelClass();
+  }
 
-    public function __construct($input)
-    {
-        $this->validateInput($input);
-        $modelClass = $this->modelClass();
-        $this->newModel = new $modelClass();
-    }
+  /**
+   * @return string
+   */
 
-    /**
-     * @return string
-     */
+  abstract protected function modelClass();
 
-    abstract protected function modelClass();
+  /**
+   * @return string
+   */
 
-    /**
-     * @return string
-     */
+  public function successMessage()
+  {
+    return '保存成功';
+  }
 
-    public function successMessage()
-    {
-        return '保存成功';
-    }
+  /**
+   * @return string
+   */
 
-    /**
-     * @return string
-     */
-
-    public function failedMessage()
-    {
-        return '保存失败';
-    }
+  public function failedMessage()
+  {
+    return '保存失败';
+  }
 }

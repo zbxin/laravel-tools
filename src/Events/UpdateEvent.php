@@ -4,38 +4,38 @@ namespace ZhiEq\Events;
 
 use Illuminate\Validation\ValidationException;
 
-abstract class UpdateEvent extends Event implements EventValidatorInterface
+abstract class UpdateEvent extends ValidatorEvent
 {
-    use EventQueryModelTrait, EventValidatorTrait;
+  use EventQueryModelTrait;
 
-    /**
-     * UpdateEvent constructor.
-     * @param $code
-     * @param array $input
-     * @throws ValidationException
-     */
+  /**
+   * UpdateEvent constructor.
+   * @param $code
+   * @param array $input
+   * @throws ValidationException
+   */
 
-    public function __construct($code, array $input)
-    {
-        $this->query($code);
-        $this->validateInput($input);
-    }
+  public function __construct($code, array $input)
+  {
+    $this->query($code);
+    $this->validateInput($input);
+  }
 
-    /**
-     * @return string
-     */
+  /**
+   * @return string
+   */
 
-    public function successMessage()
-    {
-        return '保存成功';
-    }
+  public function successMessage()
+  {
+    return '保存成功';
+  }
 
-    /**
-     * @return string
-     */
+  /**
+   * @return string
+   */
 
-    public function failedMessage()
-    {
-        return '保存失败';
-    }
+  public function failedMessage()
+  {
+    return '保存失败';
+  }
 }
