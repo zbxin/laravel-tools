@@ -5,6 +5,7 @@ namespace ZhiEq\Utils;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\MessageBag;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Concerns\ValidatesAttributes;
 
 class FastValidator
@@ -82,7 +83,7 @@ class FastValidator
           'attribute' => $attribute,
           'method' => $method,
           'parameters' => explode(',', $parameters),
-          'message' => $attribute . ' ' . title_case($method),
+          'message' => $attribute . ' ' . Str::title($method),
           'nullAble' => $nullAble
         ];
         logs()->info('rule explode', [
