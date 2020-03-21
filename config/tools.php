@@ -16,6 +16,9 @@ return [
   //编码生成器默认编码长度
   'model_code_length' => env('MODEL_CODE_LENGTH', 10),
 
+  //定时任务开关
+  'cron_task_switch' => env('CRON_TASK_SWITCH', false),
+
   //定时任务
   /**
    * 定时执行的命令行格式如下
@@ -27,7 +30,5 @@ return [
    *      ['command'=>'xxx','interval'=>10,'align'=>0]
    * ]
    */
-  'cron_tasks' => [
-
-  ],
+  'cron_tasks' => [],
 ];

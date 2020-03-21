@@ -38,10 +38,16 @@ class CronTask extends Command
     protected $nextTasks = [];
 
     /**
-     * @var
+     * @var int
      */
 
     protected $nextRunTime;
+
+    /**
+     * @var boolean
+     */
+
+    protected $isRunTask = false;
 
     /**
      * CronTask constructor.
@@ -50,12 +56,12 @@ class CronTask extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->isRunTask = config('tools.cron_task_switch', false);
         $this->tasks = array_merge($this->tasks, config('tools.cron_tasks'));
         $this->tasks = array_map(function ($task) {
             $nextRun = Carbon::now()->addSeconds($task['interval']);
             $task['nextRunTime'] = $task['align'] === false ?
-                $nextRun->timestamp :
-                (new Carbon($nextRun->format('Y-m-d H:i:' . $task['align'])))->timestamp;
+                $nextRun->timestamp : (new Carbon($nextRun->format('Y-m-d H:i:' . $task['align'])))->timestamp;
             return $task;
         }, $this->tasks);
     }
@@ -97,6 +103,11 @@ class CronTask extends Command
 
     public function handle()
     {
+        if ($this->isRunTask === false) {
+            $this->recordInfo('Cron Switch Is Close');
+            time_sleep_until(Carbon::now()->addYears(99)->timestamp);
+            exit;
+        }
         $this->recordInfo('Begin Run Cron Listen At:' . $this->nowTime());
         while (true) {
             $this->nextRunTime();
@@ -124,5 +135,4 @@ class CronTask extends Command
         logs()->info($message);
         $this->{$type}($message);
     }
-
 }
