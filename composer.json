@@ -12,7 +12,6 @@
   "require": {
     "laravel/framework": "*",
     "ext-json": "*",
-    "zbxin/laravel-region": "^1.0",
     "zbxin/laravel-gee-test": "^1.0",
     "zbxin/laravel-contracts": "^1.0",
     "zbxin/laravel-api-signature-middleware": "^1.0",
