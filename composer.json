@@ -1,37 +1,36 @@
 {
-  "name": "zhieq/laravel-tools",
+  "name": "zbxin/laravel-tools",
   "description": "zhieq group commonly used tools",
   "type": "library",
   "license": "MIT",
   "authors": [
     {
-      "name": "zhieq",
-      "email": "developer@zhieq.com"
+      "name": "zbxin",
+      "email": "developer@zbxin.com"
     }
   ],
   "require": {
     "laravel/framework": "*",
     "ext-json": "*",
-    "zhieq/laravel-region": "^1.0",
-    "zhieq/laravel-gee-test": "^1.0",
-    "zhieq/laravel-contracts": "^1.0",
-    "zhieq/laravel-api-signature-middleware": "^1.0",
-    "zhieq/laravel-case-json-middleware": "^1.0",
-    "zhieq/laravel-encrypt-middleware": "^1.0",
-    "zhieq/laravel-api-token-auth": "^1.0",
-    "zhieq/laravel-supports": "^1.0",
-    "zhieq/laravel-sms": "^1.0",
-    "zhieq/laravel-verification-code": "^1.0"
+    "zbxin/laravel-gee-test": "^1.0",
+    "zbxin/laravel-contracts": "^1.0",
+    "zbxin/laravel-api-signature-middleware": "^1.0",
+    "zbxin/laravel-case-json-middleware": "^1.0",
+    "zbxin/laravel-encrypt-middleware": "^1.0",
+    "zbxin/laravel-api-token-auth": "^1.0",
+    "zbxin/laravel-supports": "^1.0",
+    "zbxin/laravel-sms": "^1.0",
+    "zbxin/laravel-verification-code": "^1.0"
   },
   "autoload": {
     "psr-4": {
-      "ZhiEq\\": "src"
+      "zbxin\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "ZhiEq\\ZhiEqToolsServiceProvider"
+        "zbxin\\ZhiEqToolsServiceProvider"
       ]
     }
   }
