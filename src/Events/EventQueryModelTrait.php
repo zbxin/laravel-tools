@@ -1,10 +1,10 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use ZhiEq\Exceptions\CustomException;
+use Zbxin\Exceptions\CustomException;
 
 trait EventQueryModelTrait
 {

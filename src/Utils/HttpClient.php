@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -8,11 +8,11 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\HandlerStack;
 use Illuminate\Http\Request;
 use Psr\Http\Message\ResponseInterface;
-use ZhiEq\ApiSignature\GuzzleMiddleware\ApiSignatureGuzzleMiddleware;
-use ZhiEq\CaseJson\GuzzleMiddleware\CaseResponseGuzzleMiddleware;
-use ZhiEq\Encrypt\AESEncrypt;
-use ZhiEq\Encrypt\GuzzleMiddleware\DecryptionBodyGuzzleMiddleware;
-use ZhiEq\Encrypt\GuzzleMiddleware\EncryptionBodyGuzzleMiddleware;
+use Zbxin\ApiSignature\GuzzleMiddleware\ApiSignatureGuzzleMiddleware;
+use Zbxin\CaseJson\GuzzleMiddleware\CaseResponseGuzzleMiddleware;
+use Zbxin\Encrypt\AESEncrypt;
+use Zbxin\Encrypt\GuzzleMiddleware\DecryptionBodyGuzzleMiddleware;
+use Zbxin\Encrypt\GuzzleMiddleware\EncryptionBodyGuzzleMiddleware;
 
 class HttpClient extends Client
 {

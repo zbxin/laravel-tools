@@ -1,13 +1,13 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use Closure;
 use Illuminate\Support\Facades\Redis;
 
 /**
  * Class CodeGenerator
- * @package ZhiEq\Utils
+ * @package Zbxin\Utils
  */
 
 class CodeGenerator

@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;

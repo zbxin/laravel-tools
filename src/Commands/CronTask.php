@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Commands;
+namespace Zbxin\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;

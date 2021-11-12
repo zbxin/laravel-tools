@@ -1,12 +1,12 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
-use ZhiEq\Contracts\Listener;
+use Zbxin\Contracts\Listener;
 
 /**
  * Trait ListensMapping
- * @package ZhiEq\Events
+ * @package Zbxin\Events
  */
 
 trait ListensMapping

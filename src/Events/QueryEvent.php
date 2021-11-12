@@ -1,10 +1,10 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
 /**
  * Class QueryEvent
- * @package ZhiEq\Events
+ * @package Zbxin\Events
  */
 
 abstract class QueryEvent extends Event

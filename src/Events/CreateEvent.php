@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;

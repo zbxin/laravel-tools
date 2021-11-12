@@ -1,15 +1,15 @@
 <?php
 
-namespace ZhiEq\Exceptions;
+namespace Zbxin\Exceptions;
 
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Debug\Exception\FlattenException;
-use ZhiEq\CaseJson\ConvertJsonKeyFormat;
-use ZhiEq\CaseJson\Exceptions\JsonKeyFormatInvalidException;
-use ZhiEq\Contracts\Exception as CustomBaseException;
+use Zbxin\CaseJson\ConvertJsonKeyFormat;
+use Zbxin\CaseJson\Exceptions\JsonKeyFormatInvalidException;
+use Zbxin\Contracts\Exception as CustomBaseException;
 
 trait ExceptionRender
 {

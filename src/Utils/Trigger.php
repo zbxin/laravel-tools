@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;

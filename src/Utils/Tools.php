@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;

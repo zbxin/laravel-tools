@@ -1,9 +1,9 @@
 <?php
 
-namespace ZhiEq;
+namespace Zbxin;
 
 use Illuminate\Support\ServiceProvider;
-use ZhiEq\Commands\CronTask;
+use Zbxin\Commands\CronTask;
 
 class ZhiEqToolsServiceProvider extends ServiceProvider
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
 use Illuminate\Http\JsonResponse;
-use ZhiEq\Exceptions\CustomException;
-use ZhiEq\Utils\Trigger;
+use Zbxin\Exceptions\CustomException;
+use Zbxin\Utils\Trigger;
 
 class EventController
 {

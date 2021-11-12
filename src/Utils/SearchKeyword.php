@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Utils;
+namespace Zbxin\Utils;
 
 use Carbon\Carbon;
 use Closure;
@@ -10,7 +10,7 @@ use InvalidArgumentException;
 
 /**
  * Class SearchKeyword
- * @package ZhiEq\Utils
+ * @package Zbxin\Utils
  */
 class SearchKeyword
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace ZhiEq\Exceptions;
+namespace Zbxin\Exceptions;
 
-use ZhiEq\Contracts\Exception;
+use Zbxin\Contracts\Exception;
 
 class CustomException extends Exception
 {

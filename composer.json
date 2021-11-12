@@ -24,13 +24,13 @@
   },
   "autoload": {
     "psr-4": {
-      "zbxin\\": "src"
+      "Zbxin\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "zbxin\\ZhiEqToolsServiceProvider"
+        "Zbxin\\ZhiEqToolsServiceProvider"
       ]
     }
   }

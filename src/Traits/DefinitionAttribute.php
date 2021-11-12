@@ -1,12 +1,12 @@
 <?php
 
-namespace ZhiEq\Traits;
+namespace Zbxin\Traits;
 
 use Illuminate\Support\Str;
 
 /**
  * Trait DefinitionAttribute
- * @package ZhiEq\Traits
+ * @package Zbxin\Traits
  */
 
 trait DefinitionAttribute

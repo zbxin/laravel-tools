@@ -1,9 +1,9 @@
 <?php
 
-namespace ZhiEq\Traits;
+namespace Zbxin\Traits;
 
-use ZhiEq\Exceptions\CustomException;
-use ZhiEq\Utils\CodeGenerator;
+use Zbxin\Exceptions\CustomException;
+use Zbxin\Utils\CodeGenerator;
 
 trait ModelCodeGenerate
 {

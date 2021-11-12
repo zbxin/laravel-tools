@@ -1,6 +1,6 @@
 <?php
 
-namespace ZhiEq\Events;
+namespace Zbxin\Events;
 
 interface EventValidatorInterface
 {
