@@ -20,7 +20,7 @@ trait ExceptionRender
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function renderInline($request, Exception $exception)
+    public function renderInline($request, $exception)
     {
         if ($exception instanceof AuthenticationException) {
             return $this->renderError('Unauthorized', 401);
