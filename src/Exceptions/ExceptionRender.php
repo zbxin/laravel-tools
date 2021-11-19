@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Zbxin\CaseJson\ConvertJsonKeyFormat;
 use Zbxin\CaseJson\Exceptions\JsonKeyFormatInvalidException;
 use Zbxin\Contracts\Exception as CustomBaseException;
@@ -36,7 +36,7 @@ trait ExceptionRender
         if ($exception instanceof JsonKeyFormatInvalidException) {
             return parent::render($request, $exception);
         }
-        $fe = FlattenException::create($exception);
+        $fe = FlattenException::createFromThrowable($exception);
         $message = $fe->getStatusCode() == 404 ?
             'Sorry, the page you are looking for could not be found.'
             : debug_output($exception->getMessage(), 'Whoops, looks like something went wrong.');
