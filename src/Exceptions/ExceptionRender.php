@@ -54,7 +54,7 @@ trait ExceptionRender
      * @return \Illuminate\Http\JsonResponse
      */
 
-    protected function renderError($message, $code = 1, $data = [], $status = 500, $headers = [], $encodingOptions = JSON_UNESCAPED_UNICODE)
+    protected function renderError($message, $code = 1, $data = [], $status = 200, $headers = [], $encodingOptions = JSON_UNESCAPED_UNICODE)
     {
         $response = errors($message, $code, $data, $status, $headers, $encodingOptions);
         $response->setContent(ConvertJsonKeyFormat::convertJsonKeyFormat($response->getContent(), config('tools.case_output_format')));
