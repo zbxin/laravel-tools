@@ -17,13 +17,13 @@ trait DefinitionAttribute
      *
      * @param $name
      * @param $key
-     * @return null
+     * @return string
      */
 
     public static function getDefinitionLabel($name, $key)
     {
         $maps = self::getDefinitionLabels($name);
-        return isset($maps[$key]) ? $maps[$key] : null;
+        return isset($maps[$key]) ? $maps[$key] : '';
     }
 
     /**

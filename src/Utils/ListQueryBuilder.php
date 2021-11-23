@@ -524,7 +524,7 @@ class ListQueryBuilder
       'data' => empty($pageList) ? [] : $this->convertList($pageList->items()),
       'currentPage' => empty($pageList) ? 1 : $pageList->currentPage(),
       'total' => empty($pageList) ? 0 : $pageList->total(),
-      'perPage' => empty($pageList) ? $this->perPage : $pageList->perPage(),
+      'perPage' => empty($pageList) ? (int)$this->perPage : (int)$pageList->perPage(),
       'lastPage' => empty($pageList) ? 1 : $pageList->lastPage()
     ];
     if ($this->isCountBaseQuery) {
