@@ -286,8 +286,8 @@ class ListQueryBuilder
 
   public function withPage($defaultPerPage = 10, $defaultPage = 1)
   {
-    $this->perPage = $this->request->header($this->perPageKey, $this->request->input('perPage',$defaultPerPage));
-    $this->page = $this->request->header($this->pageKey, $this->request->input('page',$defaultPage));
+    $this->perPage = $this->request->header($this->perPageKey, $defaultPerPage);
+    $this->page = $this->request->header($this->pageKey, $defaultPage);
     $this->withPage = true;
     return $this;
   }
